@@ -1,8 +1,7 @@
 // seed.js
 require('dotenv').config();
-const { createKysely } = require('@vercel/kv');
-
-const db = createKysely();
+// UPDATED: Import the 'kv' object directly.
+const { kv } = require('@vercel/kv');
 
 async function seedDatabase() {
     console.log("Starting to seed database with the full ARI question bank...");
@@ -41,7 +40,9 @@ async function seedDatabase() {
         }
     };
 
-    await db.set('ari-question-bank', questionBank);
+    // UPDATED: Use the 'kv' object directly.
+    await kv.set('ari-question-bank', questionBank);
+
     console.log("Database seeded successfully!");
 }
 

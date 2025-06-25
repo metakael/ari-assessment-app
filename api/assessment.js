@@ -1,7 +1,6 @@
 // api/assessment.js
-import { createKysely } from '@vercel/kv';
-
-const db = createKysely();
+// UPDATED: Import the 'kv' object directly.
+import { kv } from '@vercel/kv';
 
 // This is the serverless function handler.
 export default async function handler(request, response) {
@@ -9,7 +8,8 @@ export default async function handler(request, response) {
     try {
         const { action, sessionId, payload } = await request.json();
         // On every request, we fetch the entire question bank from our database.
-        const questionBank = await db.get('ari-question-bank');
+        // UPDATED: Use the 'kv' object directly.
+        const questionBank = await kv.get('ari-question-bank');
 
         // ACTION: 'start' - Initializes a new test session.
         if (action === 'start') {
@@ -30,7 +30,8 @@ export default async function handler(request, response) {
             const firstQuestion = questionBank.phase1.find(q => q.id === firstQuestionId);
 
             // Save the initial state of this user's session in our database.
-            await db.set(newSessionId, sessionData);
+            // UPDATED: Use the 'kv' object directly.
+            await kv.set(newSessionId, sessionData);
 
             // Send back the session ID and the first question to the frontend.
             return response.status(200).json({ 
@@ -43,7 +44,7 @@ export default async function handler(request, response) {
 
         // ACTION: 'submitAnswer' - Processes a user's answer for Phase 1 or 2.
         if (action === 'submitAnswer') {
-            let sessionData = await db.get(sessionId);
+            let sessionData = await kv.get(sessionId);
             if (!sessionData) return response.status(404).json({ error: "Session not found." });
 
             const { answers } = payload;
@@ -57,7 +58,7 @@ export default async function handler(request, response) {
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
                 sessionData.primaryDomain = sortedScores[0][0];
                 sessionData.secondaryDomain = sortedScores[1][0];
-                await db.set(sessionId, sessionData);
+                await kv.set(sessionId, sessionData);
                 return response.status(200).json({ 
                     status: 'domainResults', 
                     primaryDomain: sessionData.primaryDomain, 
@@ -90,7 +91,7 @@ export default async function handler(request, response) {
             }
 
             nextQuestion.options = nextQuestion.options.sort(() => 0.5 - Math.random());
-            await db.set(sessionId, sessionData);
+            await kv.set(sessionId, sessionData);
 
             return response.status(200).json({
                 status: 'nextQuestion',
@@ -101,7 +102,7 @@ export default async function handler(request, response) {
 
         // ACTION: 'startArchetypeTest' - Begins Phase 3.
         if (action === 'startArchetypeTest') {
-            let sessionData = await db.get(sessionId);
+            let sessionData = await kv.get(sessionId);
             const primaryDomain = sessionData.primaryDomain;
             sessionData.phase = 3;
             // Get the 10 fixed questions for the user's primary domain.
@@ -109,7 +110,7 @@ export default async function handler(request, response) {
             const nextQId = sessionData.phase3Ids.shift();
             const nextQ = questionBank.phase3[primaryDomain].find(q => q.id === nextQId);
             
-            await db.set(sessionId, sessionData);
+            await kv.set(sessionId, sessionData);
             return response.status(200).json({ 
                 status: 'archetypeQuestion', 
                 question: { ...nextQ, options: nextQ.options.sort(() => 0.5 - Math.random()) }
@@ -118,7 +119,7 @@ export default async function handler(request, response) {
 
         // ACTION: 'submitArchetypeAnswer' - Processes a Phase 3 answer.
         if (action === 'submitArchetypeAnswer') {
-            let sessionData = await db.get(sessionId);
+            let sessionData = await kv.get(sessionId);
             const { answers } = payload;
             for (const archetype in answers) {
                 sessionData.archetypeScores[archetype] = (sessionData.archetypeScores[archetype] || 0) + answers[archetype];
@@ -128,7 +129,7 @@ export default async function handler(request, response) {
             if (sessionData.phase3Ids.length > 0) {
                 const nextQId = sessionData.phase3Ids.shift();
                 const nextQ = questionBank.phase3[sessionData.primaryDomain].find(q => q.id === nextQId);
-                await db.set(sessionId, sessionData);
+                await kv.set(sessionId, sessionData);
                 return response.status(200).json({ 
                     status: 'archetypeQuestion', 
                     question: { ...nextQ, options: nextQ.options.sort(() => 0.5 - Math.random()) }
@@ -138,7 +139,7 @@ export default async function handler(request, response) {
                 const sortedArchetypes = Object.entries(sessionData.archetypeScores).sort((a,b) => b[1] - a[1]);
                 const finalArchetype = sortedArchetypes[0][0];
                 sessionData.finalArchetype = finalArchetype;
-                await db.set(sessionId, sessionData); // Final save of session.
+                await kv.set(sessionId, sessionData); // Final save of session.
                 return response.status(200).json({ status: 'finalResults', finalArchetype: finalArchetype });
             }
         }
