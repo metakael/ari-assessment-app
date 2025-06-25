@@ -1,17 +1,18 @@
 // api/assessment.js
 import { kv } from '@vercel/kv';
 
-// This is the serverless function handler.
 export default async function handler(request, response) {
     try {
         const { action, sessionId, payload } = request.body;
-        const questionBank = await kv.get('ari-question-bank');
+        const questionBank = await kv.get('ari-v2-question-bank');
+        if (!questionBank) {
+            return response.status(500).json({ error: "Question bank not found in database." });
+        }
 
-        // ACTION: 'start' - Initializes a new test session.
         if (action === 'start') {
             const newSessionId = `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
             const sessionData = {
-                scores: { praxis: 0, cognito: 0, nexus: 0, kosmos: 0, genesis: 0 },
+                scores: { mentis: 0, imperii: 0, operis: 0, foederis: 0 },
                 archetypeScores: {},
                 questionNumber: 1,
                 phase: 1,
@@ -27,11 +28,10 @@ export default async function handler(request, response) {
                 sessionId: newSessionId, 
                 question: { ...firstQuestion, options: firstQuestion.options.sort(() => 0.5 - Math.random()) },
                 questionNumber: sessionData.questionNumber,
-                totalQuestions: 20
+                totalQuestions: 18
             });
         }
 
-        // ACTION: 'submitAnswer' - Processes a user's answer for Phase 1 or 2.
         if (action === 'submitAnswer') {
             let sessionData = await kv.get(sessionId);
             if (!sessionData) return response.status(404).json({ error: "Session not found." });
@@ -42,53 +42,28 @@ export default async function handler(request, response) {
             }
             sessionData.questionNumber++;
 
-            // If we've finished Phase 2, finalize the domain results.
-            if (sessionData.questionNumber > 20) {
+            if (sessionData.questionNumber > 18) {
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
                 sessionData.primaryDomain = sortedScores[0][0];
-                sessionData.secondaryDomain = sortedScores[1][0];
                 await kv.set(sessionId, sessionData);
                 return response.status(200).json({ 
                     status: 'domainResults', 
-                    primaryDomain: sessionData.primaryDomain, 
-                    secondaryDomain: sessionData.secondaryDomain 
+                    primaryDomain: sessionData.primaryDomain
                 });
             }
             
             let nextQuestion;
-            if (sessionData.questionNumber <= 10) {
-                // Phase 1: Deliver questions in fixed order.
+            if (sessionData.questionNumber <= 8) {
                 const nextQId = sessionData.phase1Ids.shift();
                 nextQuestion = questionBank.phase1.find(q => q.id === nextQId);
             } else {
-                // Phase 2: Use adaptive logic with the robust fix.
                 sessionData.phase = 2;
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
                 const topDomain = sortedScores[0][0];
                 const secondDomain = sortedScores[1][0];
                 const thirdDomain = sortedScores[2][0];
                 
-                // --- ROBUST FIX STARTS HERE ---
-                let nextScenarioData;
-                while (sessionData.phase2Ids.length > 0 && !nextScenarioData) {
-                    const nextScenarioId = sessionData.phase2Ids.shift();
-                    nextScenarioData = questionBank.phase2.find(q => q.id === nextScenarioId);
-                }
-
-                if (!nextScenarioData) {
-                    // Fallback: If we somehow run out of valid questions, end the test gracefully.
-                    const finalSortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
-                    sessionData.primaryDomain = finalSortedScores[0][0];
-                    sessionData.secondaryDomain = finalSortedScores[1][0];
-                    await kv.set(sessionId, sessionData);
-                    return response.status(200).json({ 
-                        status: 'domainResults', 
-                        primaryDomain: sessionData.primaryDomain, 
-                        secondaryDomain: sessionData.secondaryDomain 
-                    });
-                }
-                // --- ROBUST FIX ENDS HERE ---
-
+                const nextScenarioData = questionBank.phase2.find(q => q.id === sessionData.phase2Ids.shift());
                 const option1 = nextScenarioData.options.find(opt => opt.domain === topDomain);
                 const option2 = nextScenarioData.options.find(opt => opt.domain === secondDomain);
                 const option3 = nextScenarioData.options.find(opt => opt.domain === thirdDomain);
@@ -109,14 +84,22 @@ export default async function handler(request, response) {
             });
         }
 
-        // ACTION: 'startArchetypeTest' - Begins Phase 3.
         if (action === 'startArchetypeTest') {
             let sessionData = await kv.get(sessionId);
             const primaryDomain = sessionData.primaryDomain;
             sessionData.phase = 3;
-            sessionData.phase3Ids = questionBank.phase3[primaryDomain].map(q => q.id); 
+            // UPDATED: Get IDs from the new phase3 array
+            sessionData.phase3Ids = questionBank.phase3.map(q => q.id);
+            const archetypes = Object.keys(questionBank.archetypes[primaryDomain]);
+            archetypes.forEach(arch => { sessionData.archetypeScores[arch] = 0; });
+            
             const nextQId = sessionData.phase3Ids.shift();
-            const nextQ = questionBank.phase3[primaryDomain].find(q => q.id === nextQId);
+            const nextQData = questionBank.phase3.find(q => q.id === nextQId);
+            // UPDATED: Construct the question with the correct options for the user's domain
+            const nextQ = {
+                scenario: nextQData.scenario,
+                options: nextQData.optionsByDomain[primaryDomain]
+            };
             
             await kv.set(sessionId, sessionData);
             return response.status(200).json({ 
@@ -125,17 +108,24 @@ export default async function handler(request, response) {
             });
         }
 
-        // ACTION: 'submitArchetypeAnswer' - Processes a Phase 3 answer.
-        if (action === 'submitArchetypeAnswer') {
+        if (action === 'submitArchetypeRanking') {
             let sessionData = await kv.get(sessionId);
-            const { answers } = payload;
-            for (const archetype in answers) {
-                sessionData.archetypeScores[archetype] = (sessionData.archetypeScores[archetype] || 0) + answers[archetype];
-            }
+            const { rankedArchetypes } = payload;
+            
+            const numArchetypes = rankedArchetypes.length;
+            rankedArchetypes.forEach((archetype, index) => {
+                const points = numArchetypes - index;
+                sessionData.archetypeScores[archetype] = (sessionData.archetypeScores[archetype] || 0) + points;
+            });
 
             if (sessionData.phase3Ids.length > 0) {
                 const nextQId = sessionData.phase3Ids.shift();
-                const nextQ = questionBank.phase3[sessionData.primaryDomain].find(q => q.id === nextQId);
+                // UPDATED: Logic to fetch next question from the new structure
+                const nextQData = questionBank.phase3.find(q => q.id === nextQId);
+                const nextQ = {
+                    scenario: nextQData.scenario,
+                    options: nextQData.optionsByDomain[sessionData.primaryDomain]
+                };
                 await kv.set(sessionId, sessionData);
                 return response.status(200).json({ 
                     status: 'archetypeQuestion', 
@@ -145,7 +135,7 @@ export default async function handler(request, response) {
                 const sortedArchetypes = Object.entries(sessionData.archetypeScores).sort((a,b) => b[1] - a[1]);
                 const finalArchetype = sortedArchetypes[0][0];
                 sessionData.finalArchetype = finalArchetype;
-                await kv.set(sessionId, sessionData);
+                await kv.set(sessionId, sessionData); 
                 return response.status(200).json({ status: 'finalResults', finalArchetype: finalArchetype });
             }
         }

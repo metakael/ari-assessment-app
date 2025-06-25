@@ -8,93 +8,39 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .domain-praxis { --domain-color: #db2777; } .domain-cognito { --domain-color: #6366f1; } .domain-nexus { --domain-color: #10b981; } .domain-kosmos { --domain-color: #f59e0b; } .domain-genesis { --domain-color: #8b5cf6; }
-        .domain-color { color: var(--domain-color); } .bg-domain-color { background-color: var(--domain-color); } .border-domain-color { border-color: var(--domain-color); }
-        .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #818cf8; cursor: pointer; border-radius: 50%; transition: background 0.2s ease-in-out; }
+        .domain-mentis { --domain-color: #6366f1; }
+        .domain-imperii { --domain-color: #ec4899; }
+        .domain-operis { --domain-color: #f59e0b; }
+        .domain-foederis { --domain-color: #10b981; }
+        .domain-color { color: var(--domain-color); } .border-domain-color { border-color: var(--domain-color); }
+        .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #818cf8; cursor: pointer; border-radius: 50%; }
         .slider:hover::-webkit-slider-thumb { background: #6366f1; }
+        .ranking-item { transition: all 0.2s ease-in-out; }
         [v-cloak] { display: none; }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200 flex items-center justify-center min-h-screen p-4">
     <div id="app" class="w-full max-w-2xl mx-auto" v-cloak>
         
-        <!-- Start Screen -->
         <div v-if="screen === 'start'" class="text-center bg-gray-800 p-8 rounded-2xl shadow-2xl">
             <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Archetype Resonance Index</h1>
-            <p class="text-lg text-gray-400 mb-8">An assessment to determine your fundamental approach to thought and action.</p>
-            <button @click="startTest" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-transform transform hover:scale-105" :disabled="isSubmitting">
-                {{ isSubmitting ? 'Initializing...' : 'Begin Assessment' }}
-            </button>
+            <button @click="startTest" class="mt-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg" :disabled="isSubmitting">{{ isSubmitting ? 'Initializing...' : 'Begin Assessment' }}</button>
         </div>
 
-        <!-- Assessment Screen (Phase I & II) -->
         <div v-if="screen === 'assessment'" class="bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl">
             <div class="mb-8">
-                 <h3 class="text-center text-lg font-semibold text-indigo-300 mb-4">{{ questionNumber <= 10 ? 'Phase I: Baseline' : 'Phase II: Fine-Tuning' }}</h3>
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-medium text-gray-400">Question {{ questionNumber }} / 20</span>
-                </div>
-                <div class="w-full bg-gray-700 rounded-full h-2.5">
-                    <div class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" :style="{ width: (questionNumber / 20) * 100 + '%' }"></div>
-                </div>
+                 <h3 class="text-center text-lg font-semibold text-indigo-300 mb-4">{{ questionNumber <= 8 ? 'Phase I: Baseline' : 'Phase II: Fine-Tuning' }}</h3>
+                <div class="flex justify-between items-center mb-2"><span class="text-sm font-medium text-gray-400">Question {{ questionNumber }} / 18</span></div>
+                <div class="w-full bg-gray-700 rounded-full h-2.5"><div class="bg-indigo-600 h-2.5 rounded-full" :style="{ width: (questionNumber / 18) * 100 + '%' }"></div></div>
             </div>
             <h2 class="text-xl font-semibold text-white mb-2">Scenario:</h2>
             <p class="text-gray-300 mb-8">{{ currentQuestion.scenario }}</p>
-             <div class="space-y-6">
-                <div v-for="(option, index) in currentQuestion.options" :key="index" class="p-4 bg-gray-700/50 rounded-lg border border-gray-600">
-                    <label class="block mb-2 text-md font-medium text-white">{{ option.text }}</label>
-                    <div class="flex items-center space-x-4">
-                        <input type="range" v-model.number="points[index]" min="0" max="10" @input="updatePoints(index)" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer slider">
-                        <span class="text-lg font-bold w-12 text-center domain-color" :class="'domain-' + option.domain">{{ points[index] }}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-8 flex justify-between items-center">
-                <p class="text-lg font-bold text-white" :class="{ 'text-red-500': totalPoints > 10 }">Points Allocated: {{ totalPoints }} / 10</p>
-                <button @click="submitAnswer" :disabled="totalPoints !== 10 || isSubmitting" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 disabled:bg-gray-600">Submit</button>
-            </div>
-        </div>
-
-        <!-- Domain Results Screen -->
-        <div v-if="screen === 'domainResults'" class="text-center bg-gray-800 p-8 rounded-2xl shadow-2xl">
-            <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">Domain Profile Acquired</h1>
-            <p class="text-lg text-gray-400 mb-8">The assessment has identified your primary modes of operation.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-left">
-                <div class="p-6 rounded-xl border-2" :class="['domain-' + primaryDomain.id, 'bg-gray-900/50', 'border-domain-color']">
-                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-1">Primary Domain</h3>
-                    <h2 class="text-3xl font-bold domain-color mb-2">{{ primaryDomain.name }}</h2>
-                </div>
-                <div class="p-6 rounded-xl border border-gray-600 bg-gray-900/50">
-                    <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-1">Secondary Domain</h3>
-                    <h2 class="text-3xl font-bold domain-color" :class="'domain-' + secondaryDomain.id">{{ secondaryDomain.name }}</h2>
-                </div>
-            </div>
-            <p class="text-gray-400 mb-6">You may conclude the assessment now, or proceed to Phase III to determine your specific Archetype.</p>
-            <div class="flex justify-center space-x-4">
-                <button @click="startArchetypeTest" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg" :disabled="isSubmitting">Begin Phase III</button>
-                <button @click="resetTest" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg">End Assessment</button>
-            </div>
-        </div>
-        
-        <!-- Archetype Assessment Screen -->
-        <div v-if="screen === 'archetypeAssessment'" class="bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl">
-            <div class="mb-8">
-                <h3 class="text-center text-lg font-semibold text-indigo-300 mb-4">Phase III: Archetype Differentiation</h3>
-                 <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-medium text-gray-400">Question {{ phase3QuestionNumber }} / 10</span>
-                </div>
-                <div class="w-full bg-gray-700 rounded-full h-2.5">
-                    <div class="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" :style="{ width: (phase3QuestionNumber / 10) * 100 + '%' }"></div>
-                </div>
-            </div>
-            <h2 class="text-xl font-semibold text-white mb-2">Scenario:</h2>
-            <p class="text-gray-300 mb-8">{{ currentQuestion.scenario }}</p>
-             <div class="space-y-6">
+            <div class="space-y-6">
                 <div v-for="(option, index) in currentQuestion.options" :key="index" class="p-4 bg-gray-700/50 rounded-lg border border-gray-600">
                     <label class="block mb-2 text-md font-medium text-white">{{ option.text }}</label>
                     <div class="flex items-center space-x-4">
                         <input type="range" v-model.number="points[index]" min="0" max="10" @input="updatePoints(index)" class="w-full h-2 bg-gray-600 rounded-lg slider">
-                        <span class="text-lg font-bold w-12 text-center domain-color" :class="'domain-' + primaryDomain.id">{{ points[index] }}</span>
+                        <span class="text-lg font-bold w-12 text-center domain-color" :class="'domain-' + option.domain">{{ points[index] }}</span>
                     </div>
                 </div>
             </div>
@@ -103,15 +49,60 @@
                 <button @click="submitAnswer" :disabled="totalPoints !== 10 || isSubmitting" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-600">Submit</button>
             </div>
         </div>
+
+        <div v-if="screen === 'domainResults'" class="text-center bg-gray-800 p-8 rounded-2xl shadow-2xl">
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">Primary Domain Acquired</h1>
+            <p class="text-lg text-gray-400 mb-8">The assessment has identified your primary mode of operation.</p>
+            <div class="p-6 rounded-xl border-2 inline-block" :class="['domain-' + primaryDomain.id, 'bg-gray-900/50', 'border-domain-color']">
+                <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-1">Primary Domain</h3>
+                <h2 class="text-4xl font-bold domain-color mb-2">{{ primaryDomain.name }}</h2>
+            </div>
+            <p class="text-gray-400 my-8">Proceed to Phase III to discover your specific Archetype within the {{ primaryDomain.name }} domain.</p>
+            <div class="flex justify-center space-x-4">
+                <button @click="startArchetypeTest" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg text-lg" :disabled="isSubmitting">Begin Phase III</button>
+            </div>
+        </div>
         
-        <!-- Final Results Screen -->
+        <div v-if="screen === 'archetypeAssessment'" class="bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl">
+            <div class="mb-8">
+                <h3 class="text-center text-lg font-semibold text-indigo-300 mb-4">Phase III: Archetype Differentiation</h3>
+                 <div class="flex justify-between items-center mb-2">
+                    <!-- UPDATED: Changed total to 7 -->
+                    <span class="text-sm font-medium text-gray-400">Question {{ phase3QuestionNumber }} / 7</span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-2.5">
+                    <!-- UPDATED: Changed total to 7 -->
+                    <div class="bg-indigo-600 h-2.5 rounded-full" :style="{ width: (phase3QuestionNumber / 7) * 100 + '%' }"></div>
+                </div>
+            </div>
+            <h2 class="text-xl font-semibold text-white mb-2">Scenario:</h2>
+            <p class="text-gray-300 mb-8">{{ currentQuestion.scenario }}</p>
+            <p class="text-gray-400 mb-4 text-center">Rank the following approaches from **Most like you** (top) to **Least like you** (bottom).</p>
+            <div class="space-y-2">
+                <div v-for="(option, index) in rankedOptions" :key="option.archetype" class="ranking-item flex items-center justify-between p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                    <span class="font-bold text-lg mr-4 domain-color" :class="'domain-' + primaryDomain.id">{{ index + 1 }}</span>
+                    <span class="flex-grow text-white">{{ option.text }}</span>
+                    <div class="flex flex-col space-y-1 ml-4">
+                        <button @click="moveRank(index, -1)" :disabled="index === 0" class="p-1 rounded-full bg-gray-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                        </button>
+                        <button @click="moveRank(index, 1)" :disabled="index === rankedOptions.length - 1" class="p-1 rounded-full bg-gray-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 flex justify-end">
+                <button @click="submitAnswer" :disabled="isSubmitting" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-600">Submit</button>
+            </div>
+        </div>
+        
         <div v-if="screen === 'finalResults'" class="text-center bg-gray-800 p-8 rounded-2xl shadow-2xl">
              <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">Archetype Acquired</h1>
             <div class="p-6 rounded-xl border-2 inline-block" :class="['domain-' + primaryDomain.id, 'bg-gray-900/50', 'border-domain-color']">
                 <h3 class="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-1">Your Archetype</h3>
                 <h2 class="text-4xl font-bold domain-color mb-2">{{ finalArchetype }}</h2>
             </div>
-             <!-- AI analysis could be added back here later if desired -->
             <button @click="resetTest" class="mt-8 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition">Retake Assessment</button>
         </div>
     </div>
@@ -129,16 +120,15 @@
                 const questionNumber = ref(1);
                 const phase3QuestionNumber = ref(1);
                 const points = ref([]);
+                const rankedOptions = ref([]);
                 const primaryDomain = ref(null);
-                const secondaryDomain = ref(null);
                 const finalArchetype = ref(null);
 
                 const domainsData = {
-                    praxis: { id: 'praxis', name: 'Praxis' },
-                    cognito: { id: 'cognito', name: 'Cognito' },
-                    nexus: { id: 'nexus', name: 'Nexus' },
-                    kosmos: { id: 'kosmos', name: 'Kosmos' },
-                    genesis: { id: 'genesis', name: 'Genesis' }
+                    mentis: { id: 'mentis', name: 'Mentis' },
+                    imperii: { id: 'imperii', name: 'Imperii' },
+                    operis: { id: 'operis', name: 'Operis' },
+                    foederis: { id: 'foederis', name: 'Foederis' }
                 };
 
                 const totalPoints = computed(() => points.value ? points.value.reduce((sum, p) => sum + p, 0) : 0);
@@ -146,19 +136,10 @@
                 const apiCall = async (body) => {
                     isSubmitting.value = true;
                     try {
-                        const response = await fetch('/api/assessment', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(body)
-                        });
-                        if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                        const response = await fetch('/api/assessment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                        if (!response.ok) throw new Error(`Network error: ${response.statusText}`);
                         return await response.json();
-                    } catch (error) {
-                        console.error("API Call Error:", error);
-                        // Future: Add user-facing error message
-                    } finally {
-                        isSubmitting.value = false;
-                    }
+                    } catch (error) { console.error("API Call Error:", error); } finally { isSubmitting.value = false; }
                 };
                 
                 const startTest = async () => {
@@ -192,25 +173,20 @@
                         currentQuestion.value.options.forEach((opt, i) => { answers[opt.domain] = points.value[i]; });
                         data = await apiCall({ action: 'submitAnswer', sessionId: sessionId.value, payload: { answers } });
                     } else if (screen.value === 'archetypeAssessment') {
-                        const answers = {};
-                        currentQuestion.value.options.forEach((opt, i) => { answers[opt.archetype] = points.value[i]; });
-                        data = await apiCall({ action: 'submitArchetypeAnswer', sessionId: sessionId.value, payload: { answers } });
+                        const rankedArchetypes = rankedOptions.value.map(opt => opt.archetype);
+                        data = await apiCall({ action: 'submitArchetypeRanking', sessionId: sessionId.value, payload: { rankedArchetypes } });
                     }
                     if(data) handleBackendResponse(data);
                 };
 
                 const handleBackendResponse = (data) => {
                      if (!data) return;
-                     if (data.status === 'nextQuestion') {
-                        handleNewQuestion(data);
-                     } else if (data.status === 'domainResults') {
+                     if (data.status === 'nextQuestion') { handleNewQuestion(data); }
+                     else if (data.status === 'domainResults') {
                          primaryDomain.value = domainsData[data.primaryDomain];
-                         secondaryDomain.value = domainsData[data.secondaryDomain];
                          screen.value = 'domainResults';
-                     } else if (data.status === 'archetypeQuestion') {
-                        phase3QuestionNumber.value = 11 - data.question.remaining; // A bit of a hack to show progress
-                        handleNewQuestion(data);
-                     } else if (data.status === 'finalResults') {
+                     } else if (data.status === 'archetypeQuestion') { handleNewQuestion(data); }
+                     else if (data.status === 'finalResults') {
                          finalArchetype.value = data.finalArchetype.charAt(0).toUpperCase() + data.finalArchetype.slice(1);
                          screen.value = 'finalResults';
                      }
@@ -218,42 +194,36 @@
                 
                 const handleNewQuestion = (data) => {
                     currentQuestion.value = data.question;
-                    const numOptions = data.question.options.length;
-                    points.value = Array(numOptions).fill(Math.floor(10 / numOptions));
-                    let remainder = 10 % numOptions;
-                    for(let i=0; i<remainder; i++) { points.value[i]++; }
-
                     if (data.status === 'archetypeQuestion') {
-                        if(screen.value !== 'archetypeAssessment') phase3QuestionNumber.value = 1;
-                        else phase3QuestionNumber.value++;
+                        if(screen.value !== 'archetypeAssessment') phase3QuestionNumber.value = 1; else phase3QuestionNumber.value++;
+                        rankedOptions.value = [...data.question.options];
                         screen.value = 'archetypeAssessment';
                     } else {
                          questionNumber.value = data.questionNumber;
+                         const numOptions = data.question.options.length;
+                         points.value = Array(numOptions).fill(Math.floor(10 / numOptions));
+                         let remainder = 10 % numOptions;
+                         for(let i=0; i<remainder; i++) { points.value[i]++; }
                     }
                 };
 
                 const startArchetypeTest = async () => {
                     const data = await apiCall({ action: 'startArchetypeTest', sessionId: sessionId.value });
-                    if(data) {
-                        handleBackendResponse(data);
-                    }
+                    if(data) handleBackendResponse(data);
+                };
+                
+                const moveRank = (index, direction) => {
+                    const newIndex = index + direction;
+                    if (newIndex < 0 || newIndex >= rankedOptions.value.length) return;
+                    const item = rankedOptions.value.splice(index, 1)[0];
+                    rankedOptions.value.splice(newIndex, 0, item);
                 };
                 
                 const resetTest = () => {
-                    // Reset all state variables to their initial values
-                    screen.value = 'start';
-                    isSubmitting.value = false;
-                    sessionId.value = null;
-                    currentQuestion.value = null;
-                    questionNumber.value = 1;
-                    phase3QuestionNumber.value = 1;
-                    points.value = [];
-                    primaryDomain.value = null;
-                    secondaryDomain.value = null;
-                    finalArchetype.value = null;
+                    screen.value = 'start'; isSubmitting.value = false;
                 };
 
-                return { screen, isSubmitting, currentQuestion, questionNumber, phase3QuestionNumber, points, totalPoints, primaryDomain, secondaryDomain, finalArchetype, startTest, updatePoints, submitAnswer, startArchetypeTest, resetTest };
+                return { screen, isSubmitting, currentQuestion, questionNumber, phase3QuestionNumber, points, rankedOptions, totalPoints, primaryDomain, finalArchetype, startTest, updatePoints, submitAnswer, startArchetypeTest, resetTest, moveRank };
             }
         });
         app.mount('#app');
