@@ -1,14 +1,12 @@
 // api/assessment.js
-// UPDATED: Import the 'kv' object directly.
 import { kv } from '@vercel/kv';
 
 // This is the serverless function handler.
 export default async function handler(request, response) {
-    // We wrap everything in a try/catch block for robust error handling.
     try {
-        const { action, sessionId, payload } = await request.json();
-        // On every request, we fetch the entire question bank from our database.
-        // UPDATED: Use the 'kv' object directly.
+        // UPDATED: Access the request body directly. This is the fix.
+        const { action, sessionId, payload } = request.body;
+        
         const questionBank = await kv.get('ari-question-bank');
 
         // ACTION: 'start' - Initializes a new test session.
@@ -25,20 +23,15 @@ export default async function handler(request, response) {
                 phase2Ids: questionBank.phase2.map(q => q.id).sort(() => 0.5 - Math.random()),
             };
 
-            // Get the very first question from the fixed Phase 1 list.
             const firstQuestionId = sessionData.phase1Ids.shift();
             const firstQuestion = questionBank.phase1.find(q => q.id === firstQuestionId);
-
-            // Save the initial state of this user's session in our database.
-            // UPDATED: Use the 'kv' object directly.
             await kv.set(newSessionId, sessionData);
 
-            // Send back the session ID and the first question to the frontend.
             return response.status(200).json({ 
                 sessionId: newSessionId, 
                 question: { ...firstQuestion, options: firstQuestion.options.sort(() => 0.5 - Math.random()) },
                 questionNumber: sessionData.questionNumber,
-                totalQuestions: 20 // The initial total for phases 1 and 2.
+                totalQuestions: 20
             });
         }
 
@@ -53,7 +46,6 @@ export default async function handler(request, response) {
             }
             sessionData.questionNumber++;
 
-            // If we've finished Phase 2, finalize the domain results.
             if (sessionData.questionNumber > 20) {
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
                 sessionData.primaryDomain = sortedScores[0][0];
@@ -68,11 +60,9 @@ export default async function handler(request, response) {
             
             let nextQuestion;
             if (sessionData.questionNumber <= 10) {
-                // Phase 1: Deliver questions in fixed order.
                 const nextQId = sessionData.phase1Ids.shift();
                 nextQuestion = questionBank.phase1.find(q => q.id === nextQId);
             } else {
-                // Phase 2: Use adaptive logic to select the next triad of options.
                 sessionData.phase = 2;
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
                 const topDomain = sortedScores[0][0];
@@ -105,7 +95,6 @@ export default async function handler(request, response) {
             let sessionData = await kv.get(sessionId);
             const primaryDomain = sessionData.primaryDomain;
             sessionData.phase = 3;
-            // Get the 10 fixed questions for the user's primary domain.
             sessionData.phase3Ids = questionBank.phase3[primaryDomain].map(q => q.id); 
             const nextQId = sessionData.phase3Ids.shift();
             const nextQ = questionBank.phase3[primaryDomain].find(q => q.id === nextQId);
@@ -125,7 +114,6 @@ export default async function handler(request, response) {
                 sessionData.archetypeScores[archetype] = (sessionData.archetypeScores[archetype] || 0) + answers[archetype];
             }
 
-            // If there are more Phase 3 questions, send the next one.
             if (sessionData.phase3Ids.length > 0) {
                 const nextQId = sessionData.phase3Ids.shift();
                 const nextQ = questionBank.phase3[sessionData.primaryDomain].find(q => q.id === nextQId);
@@ -135,11 +123,10 @@ export default async function handler(request, response) {
                     question: { ...nextQ, options: nextQ.options.sort(() => 0.5 - Math.random()) }
                 });
             } else {
-                // Otherwise, calculate the final archetype.
                 const sortedArchetypes = Object.entries(sessionData.archetypeScores).sort((a,b) => b[1] - a[1]);
                 const finalArchetype = sortedArchetypes[0][0];
                 sessionData.finalArchetype = finalArchetype;
-                await kv.set(sessionId, sessionData); // Final save of session.
+                await kv.set(sessionId, sessionData);
                 return response.status(200).json({ status: 'finalResults', finalArchetype: finalArchetype });
             }
         }
