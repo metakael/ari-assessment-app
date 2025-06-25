@@ -4,9 +4,7 @@ import { kv } from '@vercel/kv';
 // This is the serverless function handler.
 export default async function handler(request, response) {
     try {
-        // UPDATED: Access the request body directly. This is the fix.
         const { action, sessionId, payload } = request.body;
-        
         const questionBank = await kv.get('ari-question-bank');
 
         // ACTION: 'start' - Initializes a new test session.
@@ -17,9 +15,7 @@ export default async function handler(request, response) {
                 archetypeScores: {},
                 questionNumber: 1,
                 phase: 1,
-                // Get Phase 1 question IDs in a fixed, sequential order.
                 phase1Ids: questionBank.phase1.map(q => q.id),
-                // Get Phase 2 question IDs and shuffle them for variety.
                 phase2Ids: questionBank.phase2.map(q => q.id).sort(() => 0.5 - Math.random()),
             };
 
@@ -46,6 +42,7 @@ export default async function handler(request, response) {
             }
             sessionData.questionNumber++;
 
+            // If we've finished Phase 2, finalize the domain results.
             if (sessionData.questionNumber > 20) {
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
                 sessionData.primaryDomain = sortedScores[0][0];
@@ -60,16 +57,38 @@ export default async function handler(request, response) {
             
             let nextQuestion;
             if (sessionData.questionNumber <= 10) {
+                // Phase 1: Deliver questions in fixed order.
                 const nextQId = sessionData.phase1Ids.shift();
                 nextQuestion = questionBank.phase1.find(q => q.id === nextQId);
             } else {
+                // Phase 2: Use adaptive logic with the robust fix.
                 sessionData.phase = 2;
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
                 const topDomain = sortedScores[0][0];
                 const secondDomain = sortedScores[1][0];
                 const thirdDomain = sortedScores[2][0];
                 
-                const nextScenarioData = questionBank.phase2.find(q => q.id === sessionData.phase2Ids.shift());
+                // --- ROBUST FIX STARTS HERE ---
+                let nextScenarioData;
+                while (sessionData.phase2Ids.length > 0 && !nextScenarioData) {
+                    const nextScenarioId = sessionData.phase2Ids.shift();
+                    nextScenarioData = questionBank.phase2.find(q => q.id === nextScenarioId);
+                }
+
+                if (!nextScenarioData) {
+                    // Fallback: If we somehow run out of valid questions, end the test gracefully.
+                    const finalSortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
+                    sessionData.primaryDomain = finalSortedScores[0][0];
+                    sessionData.secondaryDomain = finalSortedScores[1][0];
+                    await kv.set(sessionId, sessionData);
+                    return response.status(200).json({ 
+                        status: 'domainResults', 
+                        primaryDomain: sessionData.primaryDomain, 
+                        secondaryDomain: sessionData.secondaryDomain 
+                    });
+                }
+                // --- ROBUST FIX ENDS HERE ---
+
                 const option1 = nextScenarioData.options.find(opt => opt.domain === topDomain);
                 const option2 = nextScenarioData.options.find(opt => opt.domain === secondDomain);
                 const option3 = nextScenarioData.options.find(opt => opt.domain === thirdDomain);
