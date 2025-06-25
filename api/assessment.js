@@ -63,7 +63,22 @@ export default async function handler(request, response) {
                 const secondDomain = sortedScores[1][0];
                 const thirdDomain = sortedScores[2][0];
                 
-                const nextScenarioData = questionBank.phase2.find(q => q.id === sessionData.phase2Ids.shift());
+                // --- FIX STARTS HERE ---
+                const nextScenarioId = sessionData.phase2Ids.shift();
+                // Check if we've run out of Phase 2 questions BEFORE trying to use the ID.
+                if (!nextScenarioId) {
+                    const finalSortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
+                    sessionData.primaryDomain = finalSortedScores[0][0];
+                    await kv.set(sessionId, sessionData);
+                    return response.status(200).json({ 
+                        status: 'domainResults', 
+                        primaryDomain: sessionData.primaryDomain
+                    });
+                }
+                
+                const nextScenarioData = questionBank.phase2.find(q => q.id === nextScenarioId);
+                // --- FIX ENDS HERE ---
+
                 const option1 = nextScenarioData.options.find(opt => opt.domain === topDomain);
                 const option2 = nextScenarioData.options.find(opt => opt.domain === secondDomain);
                 const option3 = nextScenarioData.options.find(opt => opt.domain === thirdDomain);
@@ -88,14 +103,12 @@ export default async function handler(request, response) {
             let sessionData = await kv.get(sessionId);
             const primaryDomain = sessionData.primaryDomain;
             sessionData.phase = 3;
-            // UPDATED: Get IDs from the new phase3 array
-            sessionData.phase3Ids = questionBank.phase3.map(q => q.id);
+            sessionData.phase3Ids = questionBank.phase3[primaryDomain].map(q => q.id);
             const archetypes = Object.keys(questionBank.archetypes[primaryDomain]);
             archetypes.forEach(arch => { sessionData.archetypeScores[arch] = 0; });
             
             const nextQId = sessionData.phase3Ids.shift();
             const nextQData = questionBank.phase3.find(q => q.id === nextQId);
-            // UPDATED: Construct the question with the correct options for the user's domain
             const nextQ = {
                 scenario: nextQData.scenario,
                 options: nextQData.optionsByDomain[primaryDomain]
@@ -120,7 +133,6 @@ export default async function handler(request, response) {
 
             if (sessionData.phase3Ids.length > 0) {
                 const nextQId = sessionData.phase3Ids.shift();
-                // UPDATED: Logic to fetch next question from the new structure
                 const nextQData = questionBank.phase3.find(q => q.id === nextQId);
                 const nextQ = {
                     scenario: nextQData.scenario,
