@@ -55,28 +55,13 @@ export default async function handler(request, response) {
                     ]
                 };
             } else {
-                // Phase 2 is complete, transition to Phase 3
+                // Phase 2 is complete, show domain results
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
-                const primaryDomain = sortedScores[0][0];
-                sessionData.primaryDomain = primaryDomain;
-                sessionData.phase = 3;
-                sessionData.phase3Ids = questionBank.phase3.map(q => q.id);
-                sessionData.archetypeScores = {}; // Initialize here
-                const archetypes = Object.keys(questionBank.archetypes[primaryDomain]);
-                archetypes.forEach(arch => { sessionData.archetypeScores[arch] = 0; });
-
-                const nextQId = sessionData.phase3Ids.shift();
-                const nextQData = questionBank.phase3.find(q => q.id === nextQId);
-                const firstPhase3Question = {
-                    scenario: nextQData.scenario,
-                    options: nextQData.optionsByDomain[primaryDomain]
-                };
+                sessionData.primaryDomain = sortedScores[0][0];
                 await kv.set(sessionId, sessionData);
                 return response.status(200).json({ 
-                    status: 'archetypeQuestion', 
-                    question: { ...firstPhase3Question, options: firstPhase3Question.options.sort(() => 0.5 - Math.random()) },
-                    primaryDomain: questionBank.domains[primaryDomain],
-                    questionNumber: sessionData.questionNumber
+                    status: 'domainResults', 
+                    primaryDomain: sessionData.primaryDomain
                 });
             }
 
@@ -84,6 +69,29 @@ export default async function handler(request, response) {
             return response.status(200).json({
                 status: 'nextQuestion',
                 question: { ...nextQuestion, options: nextQuestion.options.sort(() => 0.5 - Math.random()) },
+                questionNumber: sessionData.questionNumber
+            });
+        }
+
+        if (action === 'startArchetypeTest') {
+            let sessionData = await kv.get(sessionId);
+            const primaryDomain = sessionData.primaryDomain;
+            sessionData.phase = 3;
+            sessionData.phase3Ids = questionBank.phase3.map(q => q.id);
+            sessionData.archetypeScores = {};
+            const archetypes = Object.keys(questionBank.archetypes[primaryDomain]);
+            archetypes.forEach(arch => { sessionData.archetypeScores[arch] = 0; });
+            const nextQId = sessionData.phase3Ids.shift();
+            const nextQData = questionBank.phase3.find(q => q.id === nextQId);
+            const firstPhase3Question = {
+                scenario: nextQData.scenario,
+                options: nextQData.optionsByDomain[primaryDomain]
+            };
+            await kv.set(sessionId, sessionData);
+            return response.status(200).json({ 
+                status: 'archetypeQuestion', 
+                question: { ...firstPhase3Question, options: firstPhase3Question.options.sort(() => 0.5 - Math.random()) },
+                primaryDomain: questionBank.domains[primaryDomain],
                 questionNumber: sessionData.questionNumber
             });
         }
@@ -126,7 +134,6 @@ export default async function handler(request, response) {
         }
         
         return response.status(400).json({ error: "Invalid action." });
-
     } catch (error) {
         console.error("API Error:", error);
         return response.status(500).json({ error: 'An internal error occurred.' });
