@@ -1,8 +1,11 @@
-
 {
-  "functions": {
-    "api/*.js": {
-      "runtime": "nodejs18.x"
+  "builds": [
+    {
+      "src": "api/assessment.js",
+      "use": "@vercel/node"
     }
-  }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
