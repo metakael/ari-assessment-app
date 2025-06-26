@@ -12,13 +12,17 @@
         body { font-family: 'Inter', sans-serif; background-color: #212121; }
         .font-pixel { font-family: 'Press Start 2P', cursive; }
         
-        .domain-mentis { --domain-color: #F4E2BA; } .domain-imperii { --domain-color: #F3A299; }
-        .domain-operis { --domain-color: #679594; } .domain-foederis { --domain-color: #8AC2B9; }
+        .domain-mentis { --domain-color: #F4E2BA; } 
+        .domain-imperii { --domain-color: #F3A299; }
+        .domain-operis { --domain-color: #679594; } 
+        .domain-foederis { --domain-color: #8AC2B9; }
         
-        .domain-color { color: var(--domain-color); } .border-domain-color { border-color: var(--domain-color); }
+        .domain-color { color: var(--domain-color); }
+        .border-domain-color { border-color: var(--domain-color); }
         
-        .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #8AC2B9; cursor: pointer; border-radius: 50%; }
-        .slider:hover::-webkit-slider-thumb { background: #F3A299; }
+        /* UPDATED: Neutral retro slider colors */
+        .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #a5b4fc; cursor: pointer; border-radius: 50%; }
+        .slider:hover::-webkit-slider-thumb { background: #6366f1; }
         
         .ranking-item { transition: all 0.2s ease-in-out; }
 
@@ -38,11 +42,9 @@
         <div v-if="screen === 'start'" class="text-center bg-gray-800 p-8 rounded-2xl shadow-2xl">
             <h1 class="font-pixel text-2xl md:text-3xl text-white mb-4">Archetype Resonance Index</h1>
             <p class="text-lg text-gray-400">Ever wondered what your natural contribution to a team is? Find out which Archetype you resonate most with and how you might best lead a team.</p>
-            
             <div v-if="errorMessage" class="mt-4 p-3 bg-red-800/50 border border-red-600 rounded-lg text-red-300 text-sm">
                 <strong>Error:</strong> {{ errorMessage }}
             </div>
-
             <button @click="startTest" class="mt-8 font-pixel text-center w-full max-w-xs mx-auto bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 border-2 border-gray-500 shadow-md" :disabled="isSubmitting">{{ isSubmitting ? 'Initializing...' : 'Begin Assessment' }}</button>
         </div>
 
@@ -53,7 +55,8 @@
                     <span class="text-sm font-medium text-gray-400">Question {{ questionNumber }} / 25</span>
                 </div>
                 <div class="w-full bg-gray-700 rounded-full h-2.5">
-                    <div class="bg-teal-500 h-2.5 rounded-full" :style="{ width: (questionNumber / 25) * 100 + '%' }"></div>
+                    <!-- UPDATED: Neutral progress bar color -->
+                    <div class="bg-indigo-500 h-2.5 rounded-full" :style="{ width: (questionNumber / 25) * 100 + '%' }"></div>
                 </div>
             </div>
             <h2 class="text-xl font-semibold text-white mb-2">Scenario:</h2>
@@ -64,7 +67,8 @@
                     <label class="block mb-2 text-md font-medium text-white">{{ option.text }}</label>
                     <div class="flex items-center space-x-4">
                         <input type="range" v-model.number="points[index]" min="0" max="10" @input="updatePoints(index)" class="w-full h-2 bg-gray-600 rounded-lg slider">
-                        <span class="text-lg font-bold w-12 text-center text-teal-300">{{ points[index] }}</span>
+                        <!-- UPDATED: Neutral number color -->
+                        <span class="text-lg font-bold w-12 text-center text-indigo-300">{{ points[index] }}</span>
                     </div>
                 </div>
             </div>
@@ -72,22 +76,42 @@
             <div v-if="screen === 'archetypeAssessment'" class="space-y-2">
                 <p class="text-gray-400 mb-4 text-center">Rank the following from <strong>Most like you</strong> (top) to <strong>Least like you</strong> (bottom).</p>
                 <div v-for="(option, index) in rankedOptions" :key="option.archetype" class="ranking-item flex items-center justify-between p-4 bg-gray-700/50 rounded-lg border border-gray-600">
-                    <span class="font-bold text-lg mr-4 text-teal-300">{{ index + 1 }}</span>
+                    <!-- UPDATED: Neutral ranking number color -->
+                    <span class="font-bold text-lg mr-4 text-indigo-300">{{ index + 1 }}</span>
                     <span class="flex-grow text-white">{{ option.text }}</span>
                     <div class="flex flex-col space-y-1 ml-4">
-                        <button @click="moveRank(index, -1)" :disabled="index === 0" class="p-1 rounded-full bg-gray-600 hover:bg-teal-500 disabled:opacity-50"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg></button>
-                        <button @click="moveRank(index, 1)" :disabled="index === rankedOptions.length - 1" class="p-1 rounded-full bg-gray-600 hover:bg-teal-500 disabled:opacity-50"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
+                        <!-- UPDATED: Neutral button hover color -->
+                        <button @click="moveRank(index, -1)" :disabled="index === 0" class="p-1 rounded-full bg-gray-600 hover:bg-indigo-500 disabled:opacity-50"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg></button>
+                        <button @click="moveRank(index, 1)" :disabled="index === rankedOptions.length - 1" class="p-1 rounded-full bg-gray-600 hover:bg-indigo-500 disabled:opacity-50"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
                     </div>
                 </div>
             </div>
 
             <div class="mt-8 flex justify-end">
-                <button @click="submitAnswer" :disabled="isSubmitting || (screen === 'assessment' && totalPoints !== 10)" class="bg-teal-600 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-600">Submit</button>
+                <!-- UPDATED: Neutral submit button color -->
+                <button @click="submitAnswer" :disabled="isSubmitting || (screen === 'assessment' && totalPoints !== 10)" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-600">Submit</button>
             </div>
         </div>
         
+        <!-- FIXED: Restored the final results screen content -->
         <div v-if="screen === 'finalResults'" class="bg-gray-800 p-4 md:p-6 rounded-2xl shadow-2xl pixel-box">
-             <!-- Final results content has been moved into the script for simplicity -->
+            <div class="pixel-box-inner p-4 md:p-6">
+                <h1 class="font-pixel text-xl md:text-2xl text-center mb-6">ARCHETYPE ACQUIRED</h1>
+                <div class="flex flex-col md:flex-row items-center gap-6">
+                    <div class="flex-shrink-0">
+                        <div id="symbol-sprite-container" :class="'domain-' + primaryDomain.id" :style="{'--character-color': `var(--domain-color)`}">
+                            <div v-html="archetypeSprite" class="w-full h-full"></div>
+                        </div>
+                    </div>
+                    <div class="text-left w-full">
+                        <p class="font-pixel text-md mb-2">PRIMARY DOMAIN: <span class="domain-color" :class="'domain-' + primaryDomain.id">{{ primaryDomain.name }}</span></p>
+                        <p class="mb-4 text-sm">{{ domainInfo.description }}</p>
+                        <p class="font-pixel text-md mb-2">ARCHETYPE: <span class="domain-color" :class="'domain-' + primaryDomain.id">{{ finalArchetype }}</span></p>
+                        <p class="mb-4 text-sm">{{ archetypeInfo.description }}</p>
+                    </div>
+                </div>
+                <button @click="resetTest" class="mt-8 font-pixel text-center w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 border-2 border-gray-500 shadow-md">RETAKE ASSESSMENT</button>
+            </div>
         </div>
     </div>
 
@@ -107,18 +131,37 @@
                 const primaryDomain = ref(null);
                 const finalArchetype = ref(null);
                 const profileData = ref(null);
-                const userForm = ref({ firstName: '', email: ''});
-                const formSubmitted = ref(false);
                 const errorMessage = ref(null);
 
-                // This computed property is no longer needed since we removed the dynamic sprite
-                // const archetypeSprite = computed(() => { ... });
+                const spriteLibrary = {
+                    analyst: `<path d="M4,12 h16 M4,12 l4,-4 M4,12 l4,4 M20,12 l-4,-4 M20,12 l-4,4 M12,4 v16" stroke="currentColor" stroke-width="2" fill="none" />`,
+                    innovator: `<path d="M12,4 L16,12 L8,12 Z" fill="currentColor" /><circle cx="12" cy="18" r="2" fill="currentColor"/>`,
+                    specialist: `<path d="M8,4 h8 v4 h-8z M4,8 h16 v4 h-16z M8,12 h8 v4 h-8z M12,16 v4" stroke="currentColor" stroke-width="2" fill="none" />`,
+                    commander: `<path d="M4 4 L12 12 L20 4 L12 8 Z" fill="currentColor" />`,
+                    vanguard: `<path d="M4 4 L20 12 L4 20 Z" fill="currentColor" />`,
+                    pathfinder: `<circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2" fill="none" /><path d="M12,4 v-2 M12,20 v2 M4,12 h-2 M20,12 h2" stroke="currentColor" stroke-width="2" />`,
+                    advocate: `<path d="M12,4 L20,20 L4,20 Z" fill="currentColor" /><path d="M12,4 L12 12" stroke="#FFF" stroke-width="2"/>`,
+                    forgemaster: `<path d="M4,14 h16 v2 h-16z M8,12 l-2,-6 h4z M16,12 l2,-6 h-4z" fill="currentColor" /><path d="M12,4 v6" stroke="currentColor" stroke-width="2"/>`,
+                    finisher: `<circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2" /><path d="M12,4 L16,8 M12,12 h8 M12,20 L8,16" stroke="currentColor" stroke-width="2" />`,
+                    orchestrator: `<path d="M4,4 v16 M8,4 v16 M12,4 v16 M16,4 v16 M20,4 v16" stroke="currentColor" stroke-width="1.5" />`,
+                    ambassador: `<path d="M4,8 h16 v8 h-16z" fill="none" stroke="currentColor" stroke-width="2" /><path d="M8,8 l4,-4 l4,4" fill="none" stroke="currentColor" stroke-width="2" />`,
+                    inspirer: `<circle cx="12" cy="12" r="4" fill="currentColor" /><path d="M12,4 v-2 M12,20 v2 M4,12 h-2 M20,12 h2 M7,7 l-2,-2 M17,17 l2,2 M7,17 l-2,2 M17,7 l2,-2" stroke="currentColor" stroke-width="2"/>`,
+                    peacekeeper: `<path d="M12,4 C4,4 4,20 12,20 S20,4 12,4 Z" fill="currentColor" stroke="#FFF" stroke-width="1.5" />`,
+                    guardian: `<path d="M4,4 h16 v6 l-8,4 l-8,-4z M4,10 v10 h16 v-10" fill="currentColor" />`,
+                    shepherd: `<path d="M12,4 C16,4 16,8 12,8 S8,4 12,4z M12,8 v16" stroke="currentColor" stroke-width="2" fill="none" />`
+                };
+                
+                const archetypeSprite = computed(() => {
+                    if (!finalArchetype.value) return '';
+                    const key = finalArchetype.value.toLowerCase();
+                    const symbolSVG = spriteLibrary[key] || '';
+                    return `<svg viewBox="0 0 24 24" class="w-full h-full">${symbolSVG}</svg>`;
+                });
                 
                 const totalPoints = computed(() => points.value ? points.value.reduce((sum, p) => sum + p, 0) : 0);
                 const domainInfo = computed(() => primaryDomain.value && profileData.value ? { description: profileData.value.domainDescription } : {});
                 const archetypeInfo = computed(() => finalArchetype.value && profileData.value ? { description: profileData.value.teamRole } : {});
 
-                // --- CORRECTED SCRIPT LOGIC ---
                 const apiCall = async (body) => {
                     isSubmitting.value = true;
                     errorMessage.value = null; 
@@ -140,10 +183,7 @@
                 
                 const startTest = async () => {
                     const data = await apiCall({ action: 'start' });
-                    if (data && data.question) { 
-                        sessionId.value = data.sessionId;
-                        handleNewQuestion(data); 
-                    }
+                    if (data && data.question) { sessionId.value = data.sessionId; handleNewQuestion(data); }
                 };
 
                 const updatePoints = (index) => {
@@ -209,26 +249,9 @@
                     rankedOptions.value.splice(newIndex, 0, item);
                 };
                 
-                const submitProfileRequest = async () => {
-                    const data = await apiCall({
-                        action: 'sendProfile',
-                        firstName: userForm.value.firstName,
-                        email: userForm.value.email,
-                        archetype: finalArchetype.value.toLowerCase(),
-                        sessionId: sessionId.value
-                    });
-                    if (data && data.message) {
-                        formSubmitted.value = true;
-                    }
-                };
+                const resetTest = () => { screen.value = 'start'; isSubmitting.value = false; errorMessage.value = null; };
 
-                const resetTest = () => {
-                    screen.value = 'start'; 
-                    isSubmitting.value = false;
-                    errorMessage.value = null;
-                };
-
-                return { screen, isSubmitting, sessionId, currentQuestion, questionNumber, points, rankedOptions, totalPoints, primaryDomain, finalArchetype, profileData, domainInfo, archetypeInfo, userForm, formSubmitted, errorMessage, startTest, updatePoints, submitAnswer, resetTest, moveRank, submitProfileRequest };
+                return { screen, isSubmitting, sessionId, currentQuestion, questionNumber, points, rankedOptions, totalPoints, primaryDomain, finalArchetype, profileData, domainInfo, archetypeInfo, archetypeSprite, startTest, updatePoints, submitAnswer, resetTest, moveRank };
             }
         });
         app.mount('#app');
