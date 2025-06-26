@@ -1,8 +1,14 @@
 {
+  "functions": {
+    "api/assessment.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
+      "source": "/api/assessment",
+      "destination": "/api/assessment"
     }
   ]
 }
