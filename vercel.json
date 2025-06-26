@@ -1,14 +1,8 @@
+
 {
   "functions": {
-    "api/assessment.js": {
-      "memory": 1024,
-      "maxDuration": 10
+    "api/*.js": {
+      "runtime": "nodejs18.x"
     }
-  },
-  "rewrites": [
-    {
-      "source": "/api/assessment",
-      "destination": "/api/assessment"
-    }
-  ]
+  }
 }
