@@ -35,65 +35,65 @@ export default async function handler(request, response) {
             }
             sessionData.questionNumber++;
             
-            let nextQuestion;
-            if (sessionData.phase1Ids.length > 0) {
+            let nextQuestionData;
+            
+            // --- NEW, MORE ROBUST LOGIC ---
+            if (sessionData.phase1Ids && sessionData.phase1Ids.length > 0) {
                 // Still in Phase 1
                 const nextQId = sessionData.phase1Ids.shift();
-                nextQuestion = questionBank.phase1.find(q => q.id === nextQId);
-            } else if (sessionData.phase2Ids.length > 0) {
+                nextQuestionData = questionBank.phase1.find(q => q.id === nextQId);
+            } else if (sessionData.phase2Ids && sessionData.phase2Ids.length > 0) {
                 // In Phase 2
                 sessionData.phase = 2;
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
                 const [top, second, third] = sortedScores.map(s => s[0]);
-                const nextScenarioData = questionBank.phase2.find(q => q.id === sessionData.phase2Ids.shift());
-                nextQuestion = { 
-                    scenario: nextScenarioData.scenario, 
-                    options: [
-                        nextScenarioData.options.find(o => o.domain === top),
-                        nextScenarioData.options.find(o => o.domain === second),
-                        nextScenarioData.options.find(o => o.domain === third)
-                    ]
-                };
+                const nextScenarioId = sessionData.phase2Ids.shift();
+                const scenario = questionBank.phase2.find(q => q.id === nextScenarioId);
+                
+                if (scenario) {
+                    nextQuestionData = { 
+                        scenario: scenario.scenario, 
+                        options: [
+                            scenario.options.find(o => o.domain === top),
+                            scenario.options.find(o => o.domain === second),
+                            scenario.options.find(o => o.domain === third)
+                        ]
+                    };
+                }
+            }
+            
+            // If we have a next question for Phase 1 or 2, send it
+            if (nextQuestionData) {
+                 await kv.set(sessionId, sessionData);
+                 return response.status(200).json({
+                    status: 'nextQuestion',
+                    question: { ...nextQuestionData, options: nextQuestionData.options.sort(() => 0.5 - Math.random()) },
+                    questionNumber: sessionData.questionNumber
+                });
             } else {
-                // Phase 2 is complete, show domain results
+                // Otherwise, we must be transitioning to Phase 3
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
-                sessionData.primaryDomain = sortedScores[0][0];
+                const primaryDomain = sortedScores[0][0];
+                sessionData.primaryDomain = primaryDomain;
+                sessionData.phase = 3;
+                sessionData.phase3Ids = questionBank.phase3.map(q => q.id);
+                sessionData.archetypeScores = {};
+                const archetypes = Object.keys(questionBank.archetypes[primaryDomain]);
+                archetypes.forEach(arch => { sessionData.archetypeScores[arch] = 0; });
+
+                const nextQId = sessionData.phase3Ids.shift();
+                const nextQData = questionBank.phase3.find(q => q.id === nextQId);
+                const firstPhase3Question = { scenario: nextQData.scenario, options: nextQData.optionsByDomain[primaryDomain] };
+                
                 await kv.set(sessionId, sessionData);
                 return response.status(200).json({ 
-                    status: 'domainResults', 
-                    primaryDomain: sessionData.primaryDomain
+                    status: 'archetypeQuestion', 
+                    question: { ...firstPhase3Question, options: firstPhase3Question.options.sort(() => 0.5 - Math.random()) },
+                    primaryDomain: questionBank.domains[primaryDomain],
+                    questionNumber: sessionData.questionNumber
                 });
             }
-
-            await kv.set(sessionId, sessionData);
-            return response.status(200).json({
-                status: 'nextQuestion',
-                question: { ...nextQuestion, options: nextQuestion.options.sort(() => 0.5 - Math.random()) },
-                questionNumber: sessionData.questionNumber
-            });
-        }
-
-        if (action === 'startArchetypeTest') {
-            let sessionData = await kv.get(sessionId);
-            const primaryDomain = sessionData.primaryDomain;
-            sessionData.phase = 3;
-            sessionData.phase3Ids = questionBank.phase3.map(q => q.id);
-            sessionData.archetypeScores = {};
-            const archetypes = Object.keys(questionBank.archetypes[primaryDomain]);
-            archetypes.forEach(arch => { sessionData.archetypeScores[arch] = 0; });
-            const nextQId = sessionData.phase3Ids.shift();
-            const nextQData = questionBank.phase3.find(q => q.id === nextQId);
-            const firstPhase3Question = {
-                scenario: nextQData.scenario,
-                options: nextQData.optionsByDomain[primaryDomain]
-            };
-            await kv.set(sessionId, sessionData);
-            return response.status(200).json({ 
-                status: 'archetypeQuestion', 
-                question: { ...firstPhase3Question, options: firstPhase3Question.options.sort(() => 0.5 - Math.random()) },
-                primaryDomain: questionBank.domains[primaryDomain],
-                questionNumber: sessionData.questionNumber
-            });
+            // --- END OF NEW LOGIC ---
         }
 
         if (action === 'submitArchetypeRanking') {
@@ -134,6 +134,7 @@ export default async function handler(request, response) {
         }
         
         return response.status(400).json({ error: "Invalid action." });
+
     } catch (error) {
         console.error("API Error:", error);
         return response.status(500).json({ error: 'An internal error occurred.' });
