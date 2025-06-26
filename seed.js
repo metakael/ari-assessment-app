@@ -7,10 +7,10 @@ async function seedDatabase() {
 
     const questionBank = {
         domains: {
-            mentis: { id: 'mentis', name: 'Mentis', description: 'Processing information, generating insights, and providing expertise for informed decisions.' },
-            imperii: { id: 'imperii', name: 'Imperii', description: 'Setting direction, driving change, and coordinating efforts toward strategic objectives.' },
-            operis: { id: 'operis', name: 'Operis', description: 'Implementing plans, ensuring quality, and systematically executing complex work.' },
-            foederis: { id: 'foederis', name: 'Foederis', description: 'Building relationships, supporting others, and facilitating collaborative team success.' }
+            mentis: { id: 'mentis', name: 'Mentis', description: 'Excellent at processing information, generating insights, and providing expertise for informed decisions.' },
+            imperii: { id: 'imperii', name: 'Imperii', description: 'Natural at setting direction, driving change, and coordinating efforts toward strategic objectives.' },
+            operis: { id: 'operis', name: 'Operis', description: 'Proficient in implementing plans, ensuring quality, and systematically executing complex work.' },
+            foederis: { id: 'foederis', name: 'Foederis', description: 'Talented in building relationships, supporting others, and facilitating collaborative team success.' }
         },
         archetypes: {
             mentis: { analyst: 'Analyst', innovator: 'Innovator', specialist: 'Specialist' },
@@ -273,7 +273,7 @@ async function seedDatabase() {
             // --- MENTIS ARCHETYPES ---
             analyst: {
                 quote: "Let me evaluate our options and provide clear judgment",
-                teamRole: "Natural evaluator who processes information systematically to provide objective assessments. Gravitates toward reviewing proposals, identifying risks, and offering measured recommendations. Thrives when given time to analyse before making pronouncements.",
+                teamRole: "Analysts are natural evaluators who process information systematically to provide objective assessments. In a team, they tend to gravitate toward reviewing proposals, identifying risks, and offering measured recommendations. Analysts thrive when given time to analyse before making pronouncements.",
                 strengths: ["Spots flaws and inconsistencies others miss", "Provides balanced, unbiased perspective on decisions", "Prevents teams from rushing into poor choices", "Excels at weighing pros and cons methodically", "Maintains objectivity under pressure"],
                 blindspots: ["May over-analyse and slow down urgent decisions", "Can appear overly critical or negative", "Might miss emotional/interpersonal factors in analysis", "Tendency to get lost in details and lose big picture", "May struggle with ambiguous or incomplete information"],
                 impact: {
@@ -287,7 +287,7 @@ async function seedDatabase() {
             },
             innovator: {
                 quote: "What if we tried something completely different?",
-                teamRole: "Creative catalyst who generates novel solutions and challenges conventional thinking. Naturally questions existing approaches and offers imaginative alternatives. Energised by brainstorming and blue-sky thinking sessions.",
+                teamRole: "Innovators are creative catalysts who generate novel solutions and challenges conventional thinking. In a team, they naturally question existing approaches and offer imaginative alternatives. Innovators are energised by brainstorming and blue-sky thinking sessions.",
                 strengths: ["Breaks teams out of conventional thought patterns", "Generates multiple creative alternatives to problems", "Sees possibilities others overlook", "Comfortable with ambiguity and uncertainty", "Inspires fresh perspectives and approaches"],
                 blindspots: ["Ideas may be impractical or resource-intensive", "Can become bored with implementation details", "May dismiss practical constraints too quickly", "Tendency to jump to new ideas before finishing current ones", "Sometimes struggles with incremental improvements"],
                 impact: {
@@ -301,7 +301,7 @@ async function seedDatabase() {
             },
             specialist: {
                 quote: "Here's what the research and experience tell us",
-                teamRole: "Deep domain expert who provides authoritative knowledge and maintains technical standards. Naturally becomes the go-to person for specialised information and ensures decisions are technically sound.",
+                teamRole: "Specialists are deep domain experts who provide authoritative knowledge and maintains technical standards. In a team they naturally become the go-to person for specialised information and ensure decisions are technically sound.",
                 strengths: ["Provides crucial expertise that prevents costly mistakes", "Maintains high standards within their domain", "Offers credible, evidence-based recommendations", "Keeps team grounded in proven practices", "Serves as reliable knowledge resource"],
                 blindspots: ["May become territorial about their area of expertise", "Can get stuck in \"that's not how we do it\" thinking", "Might overload team with technical details", "Tendency to focus narrowly on their specialty", "May resist cross-functional collaboration"],
                 impact: {
@@ -317,7 +317,7 @@ async function seedDatabase() {
             // --- IMPERII ARCHETYPES ---
             commander: {
                 quote: "I'll coordinate our efforts and make the key decisions",
-                teamRole: "Strategic leader who naturally takes charge of coordination and decision-making. Gravitates toward setting direction, delegating effectively, and ensuring team alignment on objectives and priorities.",
+                teamRole: "Commanders are strategic leaders who naturally take charge of coordination and decision-making. In a team, they gravitate toward setting direction, delegating effectively, and ensuring team alignment on objectives and priorities.",
                 strengths: ["Provides clear direction and accountability", "Excellent at seeing big picture and strategic connections", "Delegates effectively based on team members' strengths", "Makes difficult decisions when needed", "Creates structure from chaos"],
                 blindspots: ["May become overly controlling or micromanaging", "Can dismiss input that challenges their vision", "Might not invest enough time in team development", "Tendency to take on too much responsibility", "May struggle with consensus-building approaches"],
                 impact: {
@@ -331,7 +331,7 @@ async function seedDatabase() {
             },
             vanguard: {
                 quote: "We need to push through these obstacles and maintain momentum",
-                teamRole: "Dynamic driver who pushes teams through challenges and maintains forward momentum. Naturally confronts problems head-on, challenges complacency, and ensures the team doesn't stall or lose focus.",
+                teamRole: "Vanguards are dynamic drivers who push teams through challenges and maintain forward momentum. They naturally confront problems head-on, challenge complacency, and ensure the team doesn't stall or lose focus.",
                 strengths: ["Maintains urgency and drives results", "Confronts difficult issues others avoid", "Pushes team to higher performance levels", "Excellent in crisis situations", "Prevents stagnation and complacency"],
                 blindspots: ["May be too aggressive or impatient with team members", "Can create unnecessary conflict or tension", "Might push for action before adequate planning", "Tendency to overlook people's emotional needs", "May burn out themselves and others"],
                 impact: {
@@ -345,7 +345,7 @@ async function seedDatabase() {
             },
             pathfinder: {
                 quote: "Let's explore new possibilities and adapt to these changes",
-                teamRole: "Adaptive explorer who helps teams navigate uncertainty and discover new opportunities. Naturally embraces change, scouts ahead for possibilities, and helps teams evolve with shifting circumstances.",
+                teamRole: "Pathfinders are adaptive explorers who help teams navigate uncertainty and discover new opportunities. They naturally embrace change, scout ahead for possibilities, and helps teams evolve with shifting circumstances.",
                 strengths: ["Helps team adapt quickly to changing conditions", "Spots emerging opportunities before others", "Comfortable with ambiguity and uncertainty", "Brings fresh perspectives from outside the team", "Excellent at scenario planning and contingencies"],
                 blindspots: ["May chase too many opportunities without focus", "Can be restless with stable, routine work", "Might undervalue existing successful approaches", "Tendency to create change for change's sake", "May struggle with detailed follow-through"],
                 impact: {
@@ -359,7 +359,7 @@ async function seedDatabase() {
             },
             advocate: {
                 quote: "We need to champion what's right and drive meaningful change",
-                teamRole: "Principled champion who drives teams toward higher purposes and meaningful impact. Naturally fights for important causes, maintains ethical standards, and ensures team actions align with values.",
+                teamRole: "Advocates are principled champions who drive teams toward higher purposes and meaningful impact. They naturally fight for important causes, maintain ethical standards, and ensure team actions align with values.",
                 strengths: ["Keeps team focused on meaningful, worthwhile goals", "Maintains high ethical and quality standards", "Motivates through connection to larger purpose", "Willing to take stands on important issues", "Brings passion and conviction to team efforts"],
                 blindspots: ["May become rigid about principles vs. practical needs", "Can be seen as preachy or overly idealistic", "Might create conflict over values differences", "Tendency to take criticism of ideas personally", "May struggle with necessary compromises"],
                 impact: {
@@ -375,7 +375,7 @@ async function seedDatabase() {
             // --- OPERIS ARCHETYPES ---
             forgemaster: {
                 quote: "I'll turn our plans into systematic, reliable action",
-                teamRole: "Systematic implementer who transforms concepts into concrete reality through disciplined execution. Naturally creates structured approaches, follows through reliably, and bridges the gap between planning and results.",
+                teamRole: "Forgemasters are systematic implementers who transform concepts into concrete reality through disciplined execution. They naturally create structured approaches, follow through reliably, and bridge the gap between planning and results.",
                 strengths: ["Converts abstract ideas into actionable plans", "Provides reliable, consistent execution", "Creates systematic approaches to complex work", "Excellent at resource planning and allocation", "Builds sustainable processes and workflows"],
                 blindspots: ["May be slow to adapt plans when circumstances change", "Can become overly focused on process vs. outcomes", "Might resist creative or unconventional approaches", "Tendency to over-plan before taking action", "May struggle with ambiguous or evolving requirements"],
                 impact: {
@@ -389,7 +389,7 @@ async function seedDatabase() {
             },
             finisher: {
                 quote: "Let me ensure we deliver excellent, error-free results",
-                teamRole: "Quality perfectionist who ensures teams deliver polished, error-free outcomes. Naturally focuses on details, catches mistakes others miss, and maintains high standards throughout the work process.",
+                teamRole: "Finishers are quality perfectionists who ensure teams deliver polished, error-free outcomes. They naturally focus on details, catch mistakes others miss, and maintain high standards throughout the work process.",
                 strengths: ["Prevents costly errors and quality issues", "Maintains consistently high standards", "Excellent attention to detail and thoroughness", "Provides final quality check before delivery", "Takes pride in flawless execution"],
                 blindspots: ["May get stuck perfecting details while missing deadlines", "Can become anxious about imperfection or criticism", "Might slow team down with excessive quality checks", "Tendency to be overly critical of own and others' work", "May struggle with \"good enough\" solutions when appropriate"],
                 impact: {
@@ -403,7 +403,7 @@ async function seedDatabase() {
             },
             orchestrator: {
                 quote: "I'll structure our work and coordinate our complex operations",
-                teamRole: "Process architect who creates structure and manages workflow complexity. Naturally organises tasks, coordinates dependencies, and ensures smooth operational flow across team activities.",
+                teamRole: "Orchestrators are process architects who create structure and manage workflow complexity. They naturally organise tasks, coordinate dependencies, and ensure smooth operational flow across team activities.",
                 strengths: ["Creates order from complex, chaotic situations", "Excellent at managing multiple moving parts", "Identifies and resolves workflow bottlenecks", "Coordinates effectively across different functions", "Builds efficient systems and processes"],
                 blindspots: ["May over-structure work that needs flexibility", "Can become overwhelmed managing too many details", "Might focus on process efficiency over relationship quality", "Tendency to create bureaucracy where none is needed", "May struggle when processes break down"],
                 impact: {
@@ -419,7 +419,7 @@ async function seedDatabase() {
             // --- FOEDERIS ARCHETYPES ---
             ambassador: {
                 quote: "I'll build relationships and bring in external resources",
-                teamRole: "Network builder who expands team influence and resources through external relationships. Naturally connects with people outside the team, identifies opportunities, and brings back valuable insights and support.",
+                teamRole: "Ambassadors are network builders who expand team influence and resources through external relationships. They naturally connect with people outside the team, identify opportunities, and bring back valuable insights and support.",
                 strengths: ["Expands team's network and resource access", "Brings external perspectives and market intelligence", "Excellent at building rapport and trust quickly", "Identifies partnership and collaboration opportunities", "Represents team effectively to external stakeholders"],
                 blindspots: ["May spend too much time on external relationships vs. internal work", "Can over-promise based on enthusiasm for opportunities", "Might lose focus jumping between different external contacts", "Tendency to be overly optimistic about external support", "May struggle with detailed follow-through on connections"],
                 impact: {
@@ -433,7 +433,7 @@ async function seedDatabase() {
             },
             inspirer: {
                 quote: "I'll motivate our team and keep our energy high",
-                teamRole: "Energy catalyst who maintains team motivation and enthusiasm. Naturally uplifts others, celebrates successes, provides encouragement during difficult times, and keeps the team engaged and positive.",
+                teamRole: "Inspirers are energy catalysts who maintain team motivation and enthusiasm. They naturally uplift others, celebrate successes, provide encouragement during difficult times, and keep the team engaged and positive.",
                 strengths: ["Maintains positive team energy and morale", "Excellent at recognising and celebrating achievements", "Provides emotional support during challenging periods", "Creates enthusiasm for team goals and initiatives", "Helps team members see their potential"],
                 blindspots: ["May avoid addressing difficult or negative issues", "Can appear superficial when team needs serious discussion", "Might rely too heavily on motivation vs. systematic solutions", "Tendency to take team mood personally", "May struggle with consistently pessimistic team members"],
                 impact: {
@@ -447,7 +447,7 @@ async function seedDatabase() {
             },
             peacekeeper: {
                 quote: "I'll help us find consensus and resolve our conflicts",
-                teamRole: "Harmony facilitator who manages conflicts and builds consensus. Naturally mediates disagreements, ensures all voices are heard, and helps team members find common ground and collaborative solutions.",
+                teamRole: "Peacekeepers are harmony facilitators who manage conflicts and build consensus. They naturally mediate disagreements, ensure all voices are heard, and help team members find common ground and collaborative solutions.",
                 strengths: ["Prevents and resolves interpersonal conflicts", "Excellent at seeing multiple perspectives on issues", "Creates inclusive environment where everyone contributes", "Builds consensus and collaborative solutions", "Maintains team cohesion during difficult periods"],
                 blindspots: ["May avoid necessary conflicts that would benefit the team", "Can be indecisive when clear choices need to be made", "Might compromise quality to maintain harmony", "Tendency to take on others' emotional burdens", "May struggle with team members who prefer direct conflict"],
                 impact: {
@@ -461,7 +461,7 @@ async function seedDatabase() {
             },
             guardian: {
                 quote: "I'll protect our team from risks and threats",
-                teamRole: "Risk manager who identifies and protects against potential threats to team success. Naturally scans for dangers, prepares contingencies, and ensures team security and stability.",
+                teamRole: "Guardians are risk managers who identify and protect against potential threats to team success. They naturally scan for dangers, prepare contingencies, and ensure team security and stability.",
                 strengths: ["Identifies risks and threats others might miss", "Excellent at contingency planning and preparation", "Provides stability and security for team members", "Maintains vigilance about potential problems", "Creates safe environment for team to operate"],
                 blindspots: ["May be overly cautious and slow down progress", "Can focus too much on problems vs. opportunities", "Might create anxiety by overemphasising risks", "Tendency to resist change due to uncertainty", "May become overprotective and limit team growth"],
                 impact: {
@@ -475,7 +475,7 @@ async function seedDatabase() {
             },
             shepherd: {
                 quote: "I'll serve our team's needs and help everyone succeed",
-                teamRole: "Service-oriented supporter who nurtures team success through dedicated care and assistance. Naturally puts team needs first, provides practical support, and ensures no team member is left behind.",
+                teamRole: "Shepherds are service-oriented supporters who nurture team success through dedicated care and assistance. They naturally put team needs first, provide practical support, and ensure no team member is left behind.",
                 strengths: ["Provides practical support when team members struggle", "Maintains team culture and shared values", "Excellent at anticipating and meeting team needs", "Creates sense of belonging and psychological safety", "Demonstrates loyalty and commitment to team success"],
                 blindspots: ["May neglect own needs while serving others", "Can enable poor performance by being too supportive", "Might avoid giving difficult feedback to maintain relationships", "Tendency to take on too much responsibility for others", "May struggle with setting appropriate boundaries"],
                 impact: {

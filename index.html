@@ -5,19 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Archetype Resonance Index | Assessment</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; } .font-pixel { font-family: 'Press Start 2P', cursive; }
-        .domain-mentis { --domain-color: #6366f1; } .domain-imperii { --domain-color: #ec4899; }
-        .domain-operis { --domain-color: #f59e0b; } .domain-foederis { --domain-color: #10b981; }
-        .domain-color { color: var(--domain-color); } .border-domain-color { border-color: var(--domain-color); }
+        body { font-family: 'Inter', sans-serif; }
+        .font-pixel { font-family: 'Press Start 2P', cursive; }
+        
+        .domain-mentis { --domain-color: #6366f1; }
+        .domain-imperii { --domain-color: #ec4899; }
+        .domain-operis { --domain-color: #f59e0b; }
+        .domain-foederis { --domain-color: #10b981; }
+        
+        .domain-color { color: var(--domain-color); }
+        .border-domain-color { border-color: var(--domain-color); }
+        
         .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #a5b4fc; cursor: pointer; border-radius: 50%; }
         .slider:hover::-webkit-slider-thumb { background: #6366f1; }
+        
         .ranking-item { transition: all 0.2s ease-in-out; }
-        .pixel-box { border: 4px solid #4f4f4f; box-shadow: inset -4px -4px 0px 0px #2f2f2f, inset 4px 4px 0px 0px #a8a8a8; background-color: #7b7b7b; image-rendering: pixelated; }
-        .pixel-box-inner { border: 4px solid #4f4f4f; background-color: #c6c6c6; color: #1e1e1e; }
-        #character-sprite { width: 80px; height: 120px; animation: idle-bob 1.5s ease-in-out infinite; image-rendering: pixelated; }
-        @keyframes idle-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+        .pixel-box {
+            border: 4px solid #4f4f4f;
+            box-shadow: 
+                inset -4px -4px 0px 0px #2f2f2f,
+                inset 4px 4px 0px 0px #a8a8a8;
+            background-color: #7b7b7b;
+            image-rendering: pixelated;
+        }
+        .pixel-box-inner {
+            border: 4px solid #4f4f4f;
+            background-color: #c6c6c6;
+            color: #1e1e1e;
+        }
+
+        /* UPDATED: Simplified sprite container */
+        #symbol-sprite-container {
+            width: 96px;
+            height: 96px;
+            animation: idle-bob 1.5s ease-in-out infinite;
+            image-rendering: pixelated;
+        }
+
+        /* UPDATED: Reverted to simple idle-bob animation */
+        @keyframes idle-bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
         [v-cloak] { display: none; }
     </style>
 </head>
@@ -33,7 +68,6 @@
             <div class="mb-8">
                 <h1 class="text-center text-2xl font-bold text-indigo-300 mb-4">Archetype Resonance Index</h1>
                 <div class="flex justify-between items-center mb-2">
-                    <!-- FIX FOR ISSUE #1: Total is now always 25 -->
                     <span class="text-sm font-medium text-gray-400">Question {{ questionNumber }} / 25</span>
                 </div>
                 <div class="w-full bg-gray-700 rounded-full h-2.5">
@@ -73,21 +107,20 @@
         <div v-if="screen === 'finalResults'" class="bg-gray-800 p-4 md:p-6 rounded-2xl shadow-2xl pixel-box">
             <div class="pixel-box-inner p-4 md:p-6">
                 <h1 class="font-pixel text-xl md:text-2xl text-center mb-6">ARCHETYPE ACQUIRED</h1>
-                <div class="flex flex-col md:flex-row items-center gap-6">
-                    <div class="flex-shrink-0">
-                        <div id="character-sprite" :class="'domain-' + primaryDomain.id" :style="{'--character-color': `var(--domain-color)`}">
-                            <svg viewBox="0 0 16 24" class="w-full h-full">
-                                <rect fill="currentColor" x="5" y="0" width="6" height="6"/> <rect fill="currentColor" x="3" y="6" width="10" height="8"/>
-                                <rect fill="currentColor" x="0" y="6" width="3" height="6"/> <rect fill="currentColor" x="13" y="6" width="3" height="6"/>
-                                <rect fill="currentColor" x="4" y="14" width="3" height="10"/> <rect fill="currentColor" x="9" y="14" width="3" height="10"/>
-                            </svg>
-                        </div>
+                <div class="flex flex-col items-center gap-4">
+                    <!-- UPDATED: New container for the symbol sprite -->
+                    <div id="symbol-sprite-container" :class="'domain-' + primaryDomain.id" :style="{'--character-color': `var(--domain-color)`}">
+                        <div v-html="archetypeSprite" class="w-full h-full"></div>
                     </div>
-                    <div class="text-left w-full">
-                        <p class="font-pixel text-md mb-2">PRIMARY DOMAIN: <span class="domain-color" :class="'domain-' + primaryDomain.id">{{ primaryDomain.name }}</span></p>
-                        <p class="mb-4 text-sm">{{ domainInfo.description }}</p>
-                        <p class="font-pixel text-md mb-2">ARCHETYPE: <span class="domain-color" :class="'domain-' + primaryDomain.id">{{ finalArchetype }}</span></p>
+                    <div class="text-center w-full">
+                        <p class="font-pixel text-md mb-2">
+                            ARCHETYPE: <span class="domain-color" :class="'domain-' + primaryDomain.id">{{ finalArchetype }}</span>
+                        </p>
                         <p class="mb-4 text-sm">{{ archetypeInfo.description }}</p>
+                        <p class="font-pixel text-md mb-2">
+                            PRIMARY DOMAIN: <span class="domain-color" :class="'domain-' + primaryDomain.id">{{ primaryDomain.name }}</span>
+                        </p>
+                        <p class="mb-4 text-sm">{{ domainInfo.description }}</p>
                     </div>
                 </div>
                 <button @click="resetTest" class="mt-8 font-pixel text-center w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 border-2 border-gray-500 shadow-md">RETAKE ASSESSMENT</button>
@@ -112,6 +145,36 @@
                 const finalArchetype = ref(null);
                 const profileData = ref(null);
 
+                // --- UPDATED: New Sprite Library with Symbols ---
+                const spriteLibrary = {
+                    // MENTIS
+                    analyst: `<path d="M4,12 h16 M4,12 l4,-4 M4,12 l4,4 M20,12 l-4,-4 M20,12 l-4,4 M12,4 v16" stroke="currentColor" stroke-width="2" fill="none" />`,
+                    innovator: `<path d="M12,4 L16,12 L8,12 Z" fill="currentColor" /><circle cx="12" cy="18" r="2" fill="currentColor"/>`,
+                    specialist: `<path d="M8,4 h8 v4 h-8z M4,8 h16 v4 h-16z M8,12 h8 v4 h-8z M12,16 v4" stroke="currentColor" stroke-width="2" fill="none" />`,
+                    // IMPERII
+                    commander: `<path d="M4 4 L12 12 L20 4 L12 8 Z" fill="currentColor" />`,
+                    vanguard: `<path d="M4 4 L20 12 L4 20 Z" fill="currentColor" />`,
+                    pathfinder: `<circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2" fill="none" /><path d="M12,4 v-2 M12,20 v2 M4,12 h-2 M20,12 h2" stroke="currentColor" stroke-width="2" />`,
+                    advocate: `<path d="M12,4 L20,20 L4,20 Z" fill="currentColor" /><path d="M12,4 L12 12" stroke="#FFF" stroke-width="2"/>`,
+                    // OPERIS
+                    forgemaster: `<path d="M4,14 h16 v2 h-16z M8,12 l-2,-6 h4z M16,12 l2,-6 h-4z" fill="currentColor" /><path d="M12,4 v6" stroke="currentColor" stroke-width="2"/>`,
+                    finisher: `<circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2" /><path d="M12,4 L16,8 M12,12 h8 M12,20 L8,16" stroke="currentColor" stroke-width="2" />`,
+                    orchestrator: `<path d="M4,4 v16 M8,4 v16 M12,4 v16 M16,4 v16 M20,4 v16" stroke="currentColor" stroke-width="1.5" />`,
+                    // FOEDERIS
+                    ambassador: `<path d="M4,8 h16 v8 h-16z" fill="none" stroke="currentColor" stroke-width="2" /><path d="M8,8 l4,-4 l4,4" fill="none" stroke="currentColor" stroke-width="2" />`,
+                    inspirer: `<circle cx="12" cy="12" r="4" fill="currentColor" /><path d="M12,4 v-2 M12,20 v2 M4,12 h-2 M20,12 h2 M7,7 l-2,-2 M17,17 l2,2 M7,17 l-2,2 M17,7 l2,-2" stroke="currentColor" stroke-width="2"/>`,
+                    peacekeeper: `<path d="M12,4 C4,4 4,20 12,20 S20,4 12,4 Z" fill="currentColor" stroke="#FFF" stroke-width="1.5" />`,
+                    guardian: `<path d="M4,4 h16 v6 l-8,4 l-8,-4z M4,10 v10 h16 v-10" fill="currentColor" />`,
+                    shepherd: `<path d="M12,4 C16,4 16,8 12,8 S8,4 12,4z M12,8 v16" stroke="currentColor" stroke-width="2" fill="none" />`
+                };
+                
+                const archetypeSprite = computed(() => {
+                    if (!finalArchetype.value) return '';
+                    const key = finalArchetype.value.toLowerCase();
+                    const symbolSVG = spriteLibrary[key] || '';
+                    return `<svg viewBox="0 0 24 24" class="w-full h-full">${symbolSVG}</svg>`;
+                });
+                
                 const totalPoints = computed(() => points.value ? points.value.reduce((sum, p) => sum + p, 0) : 0);
                 const domainInfo = computed(() => primaryDomain.value && profileData.value ? { description: profileData.value.domainDescription } : {});
                 const archetypeInfo = computed(() => finalArchetype.value && profileData.value ? { description: profileData.value.teamRole } : {});
@@ -173,7 +236,6 @@
                 const handleNewQuestion = (data) => {
                     currentQuestion.value = data.question;
                     questionNumber.value = data.questionNumber;
-                    
                     if (data.status === 'archetypeQuestion') {
                         primaryDomain.value = data.primaryDomain;
                         rankedOptions.value = [...data.question.options];
@@ -196,7 +258,7 @@
                 
                 const resetTest = () => { screen.value = 'start'; isSubmitting.value = false; };
 
-                return { screen, isSubmitting, currentQuestion, questionNumber, points, rankedOptions, totalPoints, primaryDomain, finalArchetype, profileData, domainInfo, archetypeInfo, startTest, updatePoints, submitAnswer, resetTest, moveRank };
+                return { screen, isSubmitting, currentQuestion, questionNumber, points, rankedOptions, totalPoints, primaryDomain, finalArchetype, profileData, domainInfo, archetypeInfo, archetypeSprite, startTest, updatePoints, submitAnswer, resetTest, moveRank };
             }
         });
         app.mount('#app');
