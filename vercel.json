@@ -1,11 +1,31 @@
 {
+  "version": 2,
   "builds": [
     {
       "src": "api/assessment.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
     }
   ],
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+  "routes": [
+    {
+      "src": "/api/assessment",
+      "dest": "/api/assessment.js"
+    },
+    {
+      "src": "/sprites/(.*)",
+      "dest": "/public/sprites/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
   ]
 }
