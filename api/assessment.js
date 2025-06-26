@@ -19,16 +19,10 @@ export default async function handler(request, response) {
                 phase1Ids: questionBank.phase1.map(q => q.id),
                 phase2Ids: questionBank.phase2.map(q => q.id).sort(() => 0.5 - Math.random()),
             };
-
             const firstQuestionId = sessionData.phase1Ids.shift();
             const firstQuestion = questionBank.phase1.find(q => q.id === firstQuestionId);
             await kv.set(newSessionId, sessionData);
-
-            return response.status(200).json({ 
-                sessionId: newSessionId, 
-                question: { ...firstQuestion, options: firstQuestion.options.sort(() => 0.5 - Math.random()) },
-                questionNumber: sessionData.questionNumber,
-            });
+            return response.status(200).json({ sessionId: newSessionId, question: { ...firstQuestion, options: firstQuestion.options.sort(() => 0.5 - Math.random()) }, questionNumber: 1 });
         }
 
         if (action === 'submitAnswer') {
@@ -37,33 +31,23 @@ export default async function handler(request, response) {
 
             const { answers } = payload;
             for (const domain in answers) {
-                sessionData.scores[domain] = (sessionData.scores[domain] || 0) + answers[domain];
+                sessionData.scores[domain] += answers[domain];
             }
             sessionData.questionNumber++;
             
-            let nextQuestion;
-            // --- LOGIC RE-ARCHITECTURE START ---
             if (sessionData.phase1Ids.length > 0) {
-                // Still in Phase 1
                 const nextQId = sessionData.phase1Ids.shift();
-                nextQuestion = questionBank.phase1.find(q => q.id === nextQId);
+                const nextQuestion = questionBank.phase1.find(q => q.id === nextQId);
+                await kv.set(sessionId, sessionData);
+                return response.status(200).json({ status: 'nextQuestion', question: { ...nextQuestion, options: nextQuestion.options.sort(() => 0.5 - Math.random()) }, questionNumber: sessionData.questionNumber });
             } else if (sessionData.phase2Ids.length > 0) {
-                // In Phase 2
                 sessionData.phase = 2;
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
-                const [topDomain, secondDomain, thirdDomain] = sortedScores.map(s => s[0]);
-                
-                const nextScenarioId = sessionData.phase2Ids.shift();
-                const nextScenarioData = questionBank.phase2.find(q => q.id === nextScenarioId);
-                
-                const option1 = nextScenarioData.options.find(opt => opt.domain === topDomain);
-                const option2 = nextScenarioData.options.find(opt => opt.domain === secondDomain);
-                const option3 = nextScenarioData.options.find(opt => opt.domain === thirdDomain);
-                
-                nextQuestion = { 
-                    scenario: nextScenarioData.scenario, 
-                    options: [option1, option2, option3]
-                };
+                const [top, second, third] = sortedScores.map(s => s[0]);
+                const nextScenarioData = questionBank.phase2.find(q => q.id === sessionData.phase2Ids.shift());
+                const nextQuestion = { scenario: nextScenarioData.scenario, options: [nextScenarioData.options.find(o => o.domain === top), nextScenarioData.options.find(o => o.domain === second), nextScenarioData.options.find(o => o.domain === third)] };
+                await kv.set(sessionId, sessionData);
+                return response.status(200).json({ status: 'nextQuestion', question: { ...nextQuestion, options: nextQuestion.options.sort(() => 0.5 - Math.random()) }, questionNumber: sessionData.questionNumber });
             } else {
                 // Phase 2 is complete, transition to Phase 3
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
@@ -71,16 +55,15 @@ export default async function handler(request, response) {
                 sessionData.primaryDomain = primaryDomain;
                 sessionData.phase = 3;
                 sessionData.phase3Ids = questionBank.phase3.map(q => q.id);
+                // --- FIX FOR ISSUE #2 ---
+                sessionData.archetypeScores = {}; // Initialize the object
                 const archetypes = Object.keys(questionBank.archetypes[primaryDomain]);
                 archetypes.forEach(arch => { sessionData.archetypeScores[arch] = 0; });
+                // --- END FIX ---
 
                 const nextQId = sessionData.phase3Ids.shift();
                 const nextQData = questionBank.phase3.find(q => q.id === nextQId);
-                const firstPhase3Question = {
-                    scenario: nextQData.scenario,
-                    options: nextQData.optionsByDomain[primaryDomain]
-                };
-
+                const firstPhase3Question = { scenario: nextQData.scenario, options: nextQData.optionsByDomain[primaryDomain] };
                 await kv.set(sessionId, sessionData);
                 return response.status(200).json({ 
                     status: 'archetypeQuestion', 
@@ -89,35 +72,22 @@ export default async function handler(request, response) {
                     questionNumber: sessionData.questionNumber
                 });
             }
-            // --- LOGIC RE-ARCHITECTURE END ---
-
-            await kv.set(sessionId, sessionData);
-            return response.status(200).json({
-                status: 'nextQuestion',
-                question: { ...nextQuestion, options: nextQuestion.options.sort(() => 0.5 - Math.random()) },
-                questionNumber: sessionData.questionNumber
-            });
         }
 
         if (action === 'submitArchetypeRanking') {
             let sessionData = await kv.get(sessionId);
             const { rankedArchetypes } = payload;
-            
             const numArchetypes = rankedArchetypes.length;
             rankedArchetypes.forEach((archetype, index) => {
                 const points = numArchetypes - index;
                 sessionData.archetypeScores[archetype] = (sessionData.archetypeScores[archetype] || 0) + points;
             });
-
             sessionData.questionNumber++;
 
             if (sessionData.phase3Ids.length > 0) {
                 const nextQId = sessionData.phase3Ids.shift();
                 const nextQData = questionBank.phase3.find(q => q.id === nextQId);
-                const nextQ = {
-                    scenario: nextQData.scenario,
-                    options: nextQData.optionsByDomain[sessionData.primaryDomain]
-                };
+                const nextQ = { scenario: nextQData.scenario, options: nextQData.optionsByDomain[sessionData.primaryDomain] };
                 await kv.set(sessionId, sessionData);
                 return response.status(200).json({ 
                     status: 'archetypeQuestion', 
@@ -129,21 +99,16 @@ export default async function handler(request, response) {
                 const sortedArchetypes = Object.entries(sessionData.archetypeScores).sort((a,b) => b[1] - a[1]);
                 const finalArchetypeKey = sortedArchetypes[0][0];
                 const finalProfile = questionBank.profiles[finalArchetypeKey];
-                
                 return response.status(200).json({ 
                     status: 'finalResults', 
                     primaryDomain: questionBank.domains[sessionData.primaryDomain],
                     finalArchetype: finalArchetypeKey,
-                    profileData: {
-                        ...finalProfile,
-                        domainDescription: questionBank.domains[sessionData.primaryDomain].description
-                    }
+                    profileData: { ...finalProfile, domainDescription: questionBank.domains[sessionData.primaryDomain].description }
                 });
             }
         }
         
         return response.status(400).json({ error: "Invalid action." });
-
     } catch (error) {
         console.error("API Error:", error);
         return response.status(500).json({ error: 'An internal error occurred.' });
