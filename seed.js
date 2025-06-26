@@ -252,14 +252,14 @@ async function seedDatabase() {
                 scenario: "How do you define a truly successful team outcome?", 
                 optionsByDomain: { /* ... all domain options ... */ 
                     mentis: [{text: "When decisions are made based on sound analysis and logical reasoning.", archetype: "analyst"}, {text: "When breakthrough solutions create new possibilities and capabilities.", archetype: "innovator"}, {text: "When technical excellence and expertise lead to superior outcomes.", archetype: "specialist"}],
-                    imperii: [{text: "When strategic coordination leads to achieving ambitious shared goals.", archetype: "commander"}, {text: "When the team overcomes significant challenges through determined effort.", archetype: "vanguard"}, {text: "When our achievements serve meaningful purposes and create positive impact.", archetype: "pathfinder"}, {text: ".", archetype: "advocate"}],
+                    imperii: [{text: "When strategic coordination leads to achieving ambitious shared goals.", archetype: "commander"}, {text: "When the team overcomes significant challenges through determined effort.", archetype: "vanguard"}, {text: "When adaptation and exploration lead to better opportunities and outcomes.", archetype: "pathfinder"}, {text: "When our achievements serve meaningful purposes and create positive impact.", archetype: "advocate"}],
                     operis: [{text: "When systematic execution transforms plans into tangible, reliable results.", archetype: "forgemaster"}, {text: "When deliverables meet the highest standards of quality and excellence.", archetype: "finisher"}, {text: "When coordinated efforts produce efficient, well-organised outcomes.", archetype: "orchestrator"}],
                     foederis: [{text: "When external partnerships and relationships enhance our collective success.", archetype: "ambassador"}, {text: "When team members feel energised and proud of what we accomplished together.", archetype: "inspirer"}, {text: "When success is achieved through collaboration and mutual respect.", archetype: "peacekeeper"}, {text: "When goals are met while maintaining team security and stability.", archetype: "guardian"}, {text: "When success includes the growth and development of individual team members.", archetype: "shepherd"}]
                 } 
             },
             { 
                 id: 'p3_07', 
-                scenario: "Which principle guides your behavior most strongly in team settings?", 
+                scenario: "Which principle guides your behaviour most strongly in team settings?", 
                 optionsByDomain: { /* ... all domain options ... */ 
                     mentis: [{text: "Truth and objectivity should guide all important decisions.", archetype: "analyst"}, {text: "Innovation and creativity are essential for breakthrough results.", archetype: "innovator"}, {text: "Expertise and technical excellence ensure the best outcomes.", archetype: "specialist"}],
                     imperii: [{text: "Clear leadership and coordination are essential for team success.", archetype: "commander"}, {text: "Persistence and determination overcome any obstacle.", archetype: "vanguard"}, {text: "Adaptability and exploration lead to the best opportunities.", archetype: "pathfinder"}, {text: "Meaningful purpose and ethical principles must guide all actions.", archetype: "advocate"}],
@@ -267,11 +267,233 @@ async function seedDatabase() {
                     foederis: [{text: "Relationships and connections create the greatest opportunities.", archetype: "ambassador"}, {text: "Positive energy and motivation bring out everyone's best performance.", archetype: "inspirer"}, {text: "Harmony and collaboration produce the strongest outcomes.", archetype: "peacekeeper"}, {text: "Security and protection enable teams to perform their best work.", archetype: "guardian"}, {text: "Service and care for others create the most fulfilling success.", archetype: "shepherd"}]
                 } 
             },
-        ]
+        ],
+        // ... inside the questionBank object in seed.js
+        profiles: {
+            // --- MENTIS ARCHETYPES ---
+            analyst: {
+                quote: "Let me evaluate our options and provide clear judgment",
+                teamRole: "Natural evaluator who processes information systematically to provide objective assessments. Gravitates toward reviewing proposals, identifying risks, and offering measured recommendations. Thrives when given time to analyse before making pronouncements.",
+                strengths: ["Spots flaws and inconsistencies others miss", "Provides balanced, unbiased perspective on decisions", "Prevents teams from rushing into poor choices", "Excels at weighing pros and cons methodically", "Maintains objectivity under pressure"],
+                blindspots: ["May over-analyse and slow down urgent decisions", "Can appear overly critical or negative", "Might miss emotional/interpersonal factors in analysis", "Tendency to get lost in details and lose big picture", "May struggle with ambiguous or incomplete information"],
+                impact: {
+                    dos: ["Set clear deadlines for analysis to avoid endless deliberation", "Balance critical assessment with constructive alternatives", "Communicate findings in accessible, actionable terms"],
+                    avo: ["Analysis paralysis - perfect information is rarely available", "Becoming the team's default pessimist or roadblock"]
+                },
+                synergy: {
+                    high: ["The Innovator: Provides creative alternatives while Analyst evaluates feasibility", "The Forgemaster: Analyst's evaluation guides systematic implementation", "The Commander: Strategic decisions benefit from analytical assessment"],
+                    low: ["The Vanguard: Analysis pace clashes with urgency to act", "The Inspirer: Critical analysis can dampen motivational energy", "The Pathfinder: Methodical evaluation conflicts with rapid exploration"]
+                }
+            },
+            innovator: {
+                quote: "What if we tried something completely different?",
+                teamRole: "Creative catalyst who generates novel solutions and challenges conventional thinking. Naturally questions existing approaches and offers imaginative alternatives. Energised by brainstorming and blue-sky thinking sessions.",
+                strengths: ["Breaks teams out of conventional thought patterns", "Generates multiple creative alternatives to problems", "Sees possibilities others overlook", "Comfortable with ambiguity and uncertainty", "Inspires fresh perspectives and approaches"],
+                blindspots: ["Ideas may be impractical or resource-intensive", "Can become bored with implementation details", "May dismiss practical constraints too quickly", "Tendency to jump to new ideas before finishing current ones", "Sometimes struggles with incremental improvements"],
+                impact: {
+                    dos: ["Partner with Implementers to ground ideas in reality", "Focus creative energy on the team's biggest challenges", "Build on others' ideas rather than always starting fresh"],
+                    avo: ["Generating ideas without considering feasibility", "Abandoning concepts before they're properly explored"]
+                },
+                synergy: {
+                    high: ["The Analyst: Provides reality-check and evaluation of innovative ideas", "The Forgemaster: Transforms creative concepts into actionable plans", "The Pathfinder: Both explore new possibilities and adapt to change"],
+                    low: ["The Finisher: Creative chaos clashes with perfectionist structure", "The Specialist: Novel approaches conflict with established expertise", "The Orchestrator: Innovation disrupts systematic processes"]
+                }
+            },
+            specialist: {
+                quote: "Here's what the research and experience tell us",
+                teamRole: "Deep domain expert who provides authoritative knowledge and maintains technical standards. Naturally becomes the go-to person for specialised information and ensures decisions are technically sound.",
+                strengths: ["Provides crucial expertise that prevents costly mistakes", "Maintains high standards within their domain", "Offers credible, evidence-based recommendations", "Keeps team grounded in proven practices", "Serves as reliable knowledge resource"],
+                blindspots: ["May become territorial about their area of expertise", "Can get stuck in \"that's not how we do it\" thinking", "Might overload team with technical details", "Tendency to focus narrowly on their specialty", "May resist cross-functional collaboration"],
+                impact: {
+                    dos: ["Translate expertise into accessible business language", "Stay curious about developments outside your domain", "Mentor others to build team capability"],
+                    avo: ["Being the bottleneck for all domain-related decisions", "Dismissing insights from outside your specialty"]
+                },
+                synergy: {
+                    high: ["The Analyst: Expert knowledge enhances analytical evaluation", "The Orchestrator: Specialised expertise guides process design", "The Guardian: Technical knowledge helps identify real risks"],
+                    low: ["The Innovator: Established expertise clashes with novel approaches", "The Vanguard: Technical constraints conflict with drive to push forward", "The Advocate: Specialised focus conflicts with broader principled concerns"]
+                }
+            },
+
+            // --- IMPERII ARCHETYPES ---
+            commander: {
+                quote: "I'll coordinate our efforts and make the key decisions",
+                teamRole: "Strategic leader who naturally takes charge of coordination and decision-making. Gravitates toward setting direction, delegating effectively, and ensuring team alignment on objectives and priorities.",
+                strengths: ["Provides clear direction and accountability", "Excellent at seeing big picture and strategic connections", "Delegates effectively based on team members' strengths", "Makes difficult decisions when needed", "Creates structure from chaos"],
+                blindspots: ["May become overly controlling or micromanaging", "Can dismiss input that challenges their vision", "Might not invest enough time in team development", "Tendency to take on too much responsibility", "May struggle with consensus-building approaches"],
+                impact: {
+                    dos: ["Regularly seek input before making major decisions", "Develop other team members' leadership capabilities", "Communicate the 'why' behind decisions clearly"],
+                    avo: ["Making unilateral decisions on collaborative matters", "Becoming indispensable to every team function"]
+                },
+                synergy: {
+                    high: ["The Analyst: Strategic decisions benefit from objective evaluation", "The Orchestrator: Coordination skills complement systematic execution", "The Ambassador: External relationships support strategic objectives"],
+                    low: ["The Advocate: Strategic pragmatism clashes with principled positions", "The Peacekeeper: Decisive leadership conflicts with consensus-building", "The Pathfinder: Strategic stability conflicts with constant exploration"]
+                }
+            },
+            vanguard: {
+                quote: "We need to push through these obstacles and maintain momentum",
+                teamRole: "Dynamic driver who pushes teams through challenges and maintains forward momentum. Naturally confronts problems head-on, challenges complacency, and ensures the team doesn't stall or lose focus.",
+                strengths: ["Maintains urgency and drives results", "Confronts difficult issues others avoid", "Pushes team to higher performance levels", "Excellent in crisis situations", "Prevents stagnation and complacency"],
+                blindspots: ["May be too aggressive or impatient with team members", "Can create unnecessary conflict or tension", "Might push for action before adequate planning", "Tendency to overlook people's emotional needs", "May burn out themselves and others"],
+                impact: {
+                    dos: ["Channel drive toward the team's biggest priorities", "Balance urgency with team member wellbeing", "Recognise when to ease pressure vs. increase it"],
+                    avo: ["Creating a constantly high-stress environment", "Pushing forward without considering different perspectives"]
+                },
+                synergy: {
+                    high: ["The Forgemaster: Drive provides momentum for systematic implementation", "The Inspirer: Urgency combines with motivation for powerful results", "The Guardian: Pushes forward while Guardian manages risks"],
+                    low: ["The Analyst: Urgency to act clashes with need for thorough analysis", "The Peacekeeper: Aggressive push conflicts with harmony maintenance", "The Shepherd: Task focus conflicts with people-first orientation"]
+                }
+            },
+            pathfinder: {
+                quote: "Let's explore new possibilities and adapt to these changes",
+                teamRole: "Adaptive explorer who helps teams navigate uncertainty and discover new opportunities. Naturally embraces change, scouts ahead for possibilities, and helps teams evolve with shifting circumstances.",
+                strengths: ["Helps team adapt quickly to changing conditions", "Spots emerging opportunities before others", "Comfortable with ambiguity and uncertainty", "Brings fresh perspectives from outside the team", "Excellent at scenario planning and contingencies"],
+                blindspots: ["May chase too many opportunities without focus", "Can be restless with stable, routine work", "Might undervalue existing successful approaches", "Tendency to create change for change's sake", "May struggle with detailed follow-through"],
+                impact: {
+                    dos: ["Focus exploration on strategic opportunities", "Help team prepare for likely future scenarios", "Balance innovation with stability"],
+                    avo: ["Constantly shifting direction without clear rationale", "Abandoning proven methods too quickly"]
+                },
+                synergy: {
+                    high: ["The Innovator: Both explore new possibilities and creative solutions", "The Ambassador: External connections support opportunity discovery", "The Analyst: Exploration benefits from objective evaluation of options"],
+                    low: ["The Specialist: Constant change conflicts with established expertise", "The Finisher: Exploration disrupts perfectionist completion", "The Commander: Ongoing adaptation conflicts with strategic stability"]
+                }
+            },
+            advocate: {
+                quote: "We need to champion what's right and drive meaningful change",
+                teamRole: "Principled champion who drives teams toward higher purposes and meaningful impact. Naturally fights for important causes, maintains ethical standards, and ensures team actions align with values.",
+                strengths: ["Keeps team focused on meaningful, worthwhile goals", "Maintains high ethical and quality standards", "Motivates through connection to larger purpose", "Willing to take stands on important issues", "Brings passion and conviction to team efforts"],
+                blindspots: ["May become rigid about principles vs. practical needs", "Can be seen as preachy or overly idealistic", "Might create conflict over values differences", "Tendency to take criticism of ideas personally", "May struggle with necessary compromises"],
+                impact: {
+                    dos: ["Connect team work to broader organisational mission", "Choose battles wisely - not every issue is worth fighting", "Listen to different perspectives on complex issues"],
+                    avo: ["Becoming inflexible about methods while staying true to values", "Alienating others through overly aggressive advocacy"]
+                },
+                synergy: {
+                    high: ["The Inspirer: Principled purpose enhances motivational energy", "The Shepherd: Both care deeply about serving others' wellbeing", "The Guardian: Shared commitment to protecting what matters"],
+                    low: ["The Commander: Principled positions clash with strategic pragmatism", "The Forgemaster: Idealistic goals conflict with practical constraints", "The Analyst: Passionate advocacy conflicts with objective evaluation"]
+                }
+            },
+            
+            // --- OPERIS ARCHETYPES ---
+            forgemaster: {
+                quote: "I'll turn our plans into systematic, reliable action",
+                teamRole: "Systematic implementer who transforms concepts into concrete reality through disciplined execution. Naturally creates structured approaches, follows through reliably, and bridges the gap between planning and results.",
+                strengths: ["Converts abstract ideas into actionable plans", "Provides reliable, consistent execution", "Creates systematic approaches to complex work", "Excellent at resource planning and allocation", "Builds sustainable processes and workflows"],
+                blindspots: ["May be slow to adapt plans when circumstances change", "Can become overly focused on process vs. outcomes", "Might resist creative or unconventional approaches", "Tendency to over-plan before taking action", "May struggle with ambiguous or evolving requirements"],
+                impact: {
+                    dos: ["Build flexibility into systematic approaches", "Regularly check that processes serve the end goal", "Involve others in refining implementation approaches"],
+                    avo: ["Getting stuck in \"we've always done it this way\" thinking", "Over-engineering solutions for simple problems"]
+                },
+                synergy: {
+                    high: ["The Innovator: Transforms creative ideas into actionable reality", "The Vanguard: Systematic approach channels drive into results", "The Commander: Implementation supports strategic coordination"],
+                    low: ["The Pathfinder: Systematic plans conflict with constant adaptation", "The Advocate: Practical constraints clash with idealistic goals", "The Inspirer: Process focus conflicts with people-first energy"]
+                }
+            },
+            finisher: {
+                quote: "Let me ensure we deliver excellent, error-free results",
+                teamRole: "Quality perfectionist who ensures teams deliver polished, error-free outcomes. Naturally focuses on details, catches mistakes others miss, and maintains high standards throughout the work process.",
+                strengths: ["Prevents costly errors and quality issues", "Maintains consistently high standards", "Excellent attention to detail and thoroughness", "Provides final quality check before delivery", "Takes pride in flawless execution"],
+                blindspots: ["May get stuck perfecting details while missing deadlines", "Can become anxious about imperfection or criticism", "Might slow team down with excessive quality checks", "Tendency to be overly critical of own and others' work", "May struggle with \"good enough\" solutions when appropriate"],
+                impact: {
+                    dos: ["Agree on quality standards upfront with the team", "Focus perfection efforts on the most critical elements", "Teach others your quality techniques"],
+                    avo: ["Perfectionism that prevents timely delivery", "Becoming the bottleneck for team progress"]
+                },
+                synergy: {
+                    high: ["The Specialist: Quality standards align with technical expertise", "The Orchestrator: Attention to detail enhances process management", "The Guardian: Quality focus supports risk prevention"],
+                    low: ["The Vanguard: Perfectionist pace conflicts with urgency to deliver", "The Innovator: Quality standards clash with creative experimentation", "The Pathfinder: Perfection conflicts with rapid exploration and adaptation"]
+                }
+            },
+            orchestrator: {
+                quote: "I'll structure our work and coordinate our complex operations",
+                teamRole: "Process architect who creates structure and manages workflow complexity. Naturally organises tasks, coordinates dependencies, and ensures smooth operational flow across team activities.",
+                strengths: ["Creates order from complex, chaotic situations", "Excellent at managing multiple moving parts", "Identifies and resolves workflow bottlenecks", "Coordinates effectively across different functions", "Builds efficient systems and processes"],
+                blindspots: ["May over-structure work that needs flexibility", "Can become overwhelmed managing too many details", "Might focus on process efficiency over relationship quality", "Tendency to create bureaucracy where none is needed", "May struggle when processes break down"],
+                impact: {
+                    dos: ["Design processes that serve the team, not the reverse", "Build in checkpoints to adjust structure as needed", "Balance efficiency with team member autonomy"],
+                    avo: ["Creating rigid systems that stifle creativity", "Becoming indispensable to basic team operations"]
+                },
+                synergy: {
+                    high: ["The Commander: Process structure supports strategic coordination", "The Finisher: Systematic approach enhances quality management", "The Specialist: Process design benefits from technical expertise"],
+                    low: ["The Innovator: Systematic processes conflict with creative chaos", "The Pathfinder: Structured operations clash with constant adaptation", "The Inspirer: Process focus conflicts with relationship-first energy"]
+                }
+            },
+            
+            // --- FOEDERIS ARCHETYPES ---
+            ambassador: {
+                quote: "I'll build relationships and bring in external resources",
+                teamRole: "Network builder who expands team influence and resources through external relationships. Naturally connects with people outside the team, identifies opportunities, and brings back valuable insights and support.",
+                strengths: ["Expands team's network and resource access", "Brings external perspectives and market intelligence", "Excellent at building rapport and trust quickly", "Identifies partnership and collaboration opportunities", "Represents team effectively to external stakeholders"],
+                blindspots: ["May spend too much time on external relationships vs. internal work", "Can over-promise based on enthusiasm for opportunities", "Might lose focus jumping between different external contacts", "Tendency to be overly optimistic about external support", "May struggle with detailed follow-through on connections"],
+                impact: {
+                    dos: ["Focus networking efforts on team's strategic priorities", "Systematically follow up on promising connections", "Share external insights regularly with the team"],
+                    avo: ["Pursuing every interesting opportunity without filtering", "Neglecting internal team relationships for external ones"]
+                },
+                synergy: {
+                    high: ["The Commander: External relationships support strategic objectives", "The Pathfinder: Network connections reveal new opportunities", "The Analyst: External intelligence enhances objective evaluation"],
+                    low: ["The Guardian: External focus conflicts with internal protection", "The Specialist: Broad networking clashes with deep expertise focus", "The Finisher: External opportunities disrupt quality completion"]
+                }
+            },
+            inspirer: {
+                quote: "I'll motivate our team and keep our energy high",
+                teamRole: "Energy catalyst who maintains team motivation and enthusiasm. Naturally uplifts others, celebrates successes, provides encouragement during difficult times, and keeps the team engaged and positive.",
+                strengths: ["Maintains positive team energy and morale", "Excellent at recognising and celebrating achievements", "Provides emotional support during challenging periods", "Creates enthusiasm for team goals and initiatives", "Helps team members see their potential"],
+                blindspots: ["May avoid addressing difficult or negative issues", "Can appear superficial when team needs serious discussion", "Might rely too heavily on motivation vs. systematic solutions", "Tendency to take team mood personally", "May struggle with consistently pessimistic team members"],
+                impact: {
+                    dos: ["Balance positivity with honest acknowledgment of challenges", "Tailor motivation approaches to different team members", "Channel enthusiasm toward concrete team objectives"],
+                    avo: ["Toxic positivity that dismisses legitimate concerns", "Burning out from constantly supporting others"]
+                },
+                synergy: {
+                    high: ["The Vanguard: Motivational energy channels drive into positive results", "The Advocate: Inspirational purpose enhances principled energy", "The Shepherd: Both focus on supporting team member success"],
+                    low: ["The Analyst: Positive energy conflicts with critical evaluation", "The Guardian: Optimistic outlook clashes with risk focus", "The Forgemaster: People focus conflicts with process orientation"]
+                }
+            },
+            peacekeeper: {
+                quote: "I'll help us find consensus and resolve our conflicts",
+                teamRole: "Harmony facilitator who manages conflicts and builds consensus. Naturally mediates disagreements, ensures all voices are heard, and helps team members find common ground and collaborative solutions.",
+                strengths: ["Prevents and resolves interpersonal conflicts", "Excellent at seeing multiple perspectives on issues", "Creates inclusive environment where everyone contributes", "Builds consensus and collaborative solutions", "Maintains team cohesion during difficult periods"],
+                blindspots: ["May avoid necessary conflicts that would benefit the team", "Can be indecisive when clear choices need to be made", "Might compromise quality to maintain harmony", "Tendency to take on others' emotional burdens", "May struggle with team members who prefer direct conflict"],
+                impact: {
+                    dos: ["Address conflicts early before they escalate", "Help team establish healthy conflict norms", "Balance consensus-building with timely decision-making"],
+                    avo: ["Avoiding all conflict even when it would be productive", "Sacrificing important outcomes for the sake of harmony"]
+                },
+                synergy: {
+                    high: ["The Shepherd: Both prioritise team member wellbeing and harmony", "The Orchestrator: Conflict resolution enhances process coordination", "The Ambassador: Diplomacy skills support external relationship building"],
+                    low: ["The Vanguard: Consensus-building conflicts with urgent action", "The Commander: Collaborative approach clashes with decisive leadership", "The Advocate: Harmony focus conflicts with principled stands"]
+                }
+            },
+            guardian: {
+                quote: "I'll protect our team from risks and threats",
+                teamRole: "Risk manager who identifies and protects against potential threats to team success. Naturally scans for dangers, prepares contingencies, and ensures team security and stability.",
+                strengths: ["Identifies risks and threats others might miss", "Excellent at contingency planning and preparation", "Provides stability and security for team members", "Maintains vigilance about potential problems", "Creates safe environment for team to operate"],
+                blindspots: ["May be overly cautious and slow down progress", "Can focus too much on problems vs. opportunities", "Might create anxiety by overemphasising risks", "Tendency to resist change due to uncertainty", "May become overprotective and limit team growth"],
+                impact: {
+                    dos: ["Balance risk awareness with calculated risk-taking", "Frame risks in terms of probability and impact", "Prepare contingencies without becoming paralysed"],
+                    avo: ["Becoming the team's source of constant worry", "Blocking beneficial changes due to theoretical risks"]
+                },
+                synergy: {
+                    high: ["The Analyst: Risk assessment benefits from objective evaluation", "The Finisher: Quality focus aligns with risk prevention", "The Advocate: Both protect what matters most to the team"],
+                    low: ["The Pathfinder: Risk aversion conflicts with exploration and change", "The Innovator: Caution clashes with creative experimentation", "The Inspirer: Risk focus conflicts with optimistic energy"]
+                }
+            },
+            shepherd: {
+                quote: "I'll serve our team's needs and help everyone succeed",
+                teamRole: "Service-oriented supporter who nurtures team success through dedicated care and assistance. Naturally puts team needs first, provides practical support, and ensures no team member is left behind.",
+                strengths: ["Provides practical support when team members struggle", "Maintains team culture and shared values", "Excellent at anticipating and meeting team needs", "Creates sense of belonging and psychological safety", "Demonstrates loyalty and commitment to team success"],
+                blindspots: ["May neglect own needs while serving others", "Can enable poor performance by being too supportive", "Might avoid giving difficult feedback to maintain relationships", "Tendency to take on too much responsibility for others", "May struggle with setting appropriate boundaries"],
+                impact: {
+                    dos: ["Balance support with accountability for performance", "Help team members develop independence", "Take care of your own needs to avoid burnout"],
+                    avo: ["Enabling dependency rather than building capability", "Sacrificing team results for individual comfort"]
+                },
+                synergy: {
+                    high: ["The Peacekeeper: Both prioritise team harmony and member wellbeing", "The Inspirer: Service orientation enhances motivational support", "The Advocate: Both care deeply about serving others' success"],
+                    low: ["The Vanguard: People-first focus conflicts with task-driven urgency", "The Analyst: Support orientation clashes with objective criticism", "The Commander: Service focus conflicts with directive leadership"]
+                }
+            }
+        }
     };
 
+    // Note: Phase 1, 2, and 3 question arrays are omitted for brevity but should be included as before.
+
     await kv.set('ari-v2-question-bank', questionBank);
-    console.log("Database seeded successfully with new efficient Phase 3 structure!");
+    console.log("Database seeded successfully with archetype profiles!");
 }
 
 seedDatabase();
