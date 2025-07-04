@@ -18,43 +18,69 @@ export default async function handler(request, response) {
                 phase: 1,
                 phase1Ids: questionBank.phase1.map(q => q.id),
                 phase2Ids: questionBank.phase2.map(q => q.id).sort(() => 0.5 - Math.random()),
-                history: [] // NEW: Initialize history for the back button
+                history: [] // Initialize history
             };
             const firstQuestionId = sessionData.phase1Ids.shift();
+            sessionData.lastQuestionId = firstQuestionId; // Track first question ID
             const firstQuestion = questionBank.phase1.find(q => q.id === firstQuestionId);
             await kv.set(newSessionId, sessionData);
             return response.status(200).json({ sessionId: newSessionId, question: { ...firstQuestion, options: firstQuestion.options.sort(() => 0.5 - Math.random()) }, questionNumber: 1 });
         }
 
-        // NEW: Handler for the 'Back' button
         if (action === 'goBack') {
             let sessionData = await kv.get(sessionId);
             if (!sessionData || !sessionData.history || sessionData.history.length === 0) {
                 return response.status(400).json({ error: "No history to revert to." });
             }
-            // Restore the most recent state from history
-            const previousState = sessionData.history.pop();
-            await kv.set(sessionId, previousState); // Save the restored state
             
-            // Re-fetch the question that corresponds to the restored state
-            let previousQuestion;
-            if (previousState.questionNumber <= 8) {
-                previousQuestion = questionBank.phase1.find(q => q.id === previousState.lastQuestionId);
-            } else {
-                 const [top, second, third] = Object.entries(previousState.scores).sort((a,b) => b[1]-a[1]).map(s => s[0]);
-                 const scenario = questionBank.phase2.find(q => q.id === previousState.lastQuestionId);
-                 previousQuestion = { scenario: scenario.scenario, options: [scenario.options.find(o => o.domain === top), scenario.options.find(o => o.domain === second), scenario.options.find(o => o.domain === third)]};
-            }
-            return response.status(200).json({ status: 'nextQuestion', question: { ...previousQuestion, options: previousQuestion.options.sort(() => 0.5 - Math.random()) }, questionNumber: previousState.questionNumber });
-        }
+            // Pop the previous state from history
+            const previousState = sessionData.history.pop();
+            
+            // Reconstruct the full session object from the previous state
+            const restoredSessionData = {
+                ...sessionData, // a good base
+                ...previousState, // overwrite with historical data
+                history: sessionData.history // ensure we use the now-shortened history
+            };
 
+            await kv.set(sessionId, restoredSessionData);
+            
+            let previousQuestion;
+            if (restoredSessionData.phase === 1) {
+                previousQuestion = questionBank.phase1.find(q => q.id === restoredSessionData.lastQuestionId);
+            } else if (restoredSessionData.phase === 2) {
+                 const [top, second, third] = Object.entries(restoredSessionData.scores).sort((a,b) => b[1]-a[1]).map(s => s[0]);
+                 const scenario = questionBank.phase2.find(q => q.id === restoredSessionData.lastQuestionId);
+                 previousQuestion = { scenario: scenario.scenario, options: [scenario.options.find(o => o.domain === top), scenario.options.find(o => o.domain === second), scenario.options.find(o => o.domain === third)]};
+            } else { // Phase 3
+                 const scenario = questionBank.phase3.find(q => q.id === restoredSessionData.lastQuestionId);
+                 previousQuestion = { scenario: scenario.scenario, options: scenario.optionsByDomain[restoredSessionData.primaryDomain] };
+            }
+
+            return response.status(200).json({ 
+                status: restoredSessionData.phase === 3 ? 'archetypeQuestion' : 'nextQuestion',
+                question: { ...previousQuestion, options: previousQuestion.options.sort(() => 0.5 - Math.random()) }, 
+                questionNumber: restoredSessionData.questionNumber,
+                primaryDomain: restoredSessionData.phase === 3 ? questionBank.domains[restoredSessionData.primaryDomain] : null
+            });
+        }
 
         if (action === 'submitAnswer') {
             let sessionData = await kv.get(sessionId);
             if (!sessionData) return response.status(404).json({ error: "Session not found." });
 
-            // Save current state to history before modifying it
-            sessionData.history.push(JSON.parse(JSON.stringify(sessionData)));
+            // UPDATED: Create a lean snapshot for history, preventing bloat.
+            const historyState = {
+                scores: JSON.parse(JSON.stringify(sessionData.scores)),
+                archetypeScores: JSON.parse(JSON.stringify(sessionData.archetypeScores)),
+                questionNumber: sessionData.questionNumber,
+                phase: sessionData.phase,
+                phase1Ids: [...sessionData.phase1Ids],
+                phase2Ids: [...sessionData.phase2Ids],
+                lastQuestionId: sessionData.lastQuestionId
+            };
+            if (!sessionData.history) sessionData.history = [];
+            sessionData.history.push(historyState);
 
             const { answers } = payload;
             for (const domain in answers) {
@@ -65,23 +91,23 @@ export default async function handler(request, response) {
             let nextQuestion;
             if (sessionData.phase1Ids.length > 0) {
                 const nextQId = sessionData.phase1Ids.shift();
-                sessionData.lastQuestionId = nextQId; // Track the ID for the back button
+                sessionData.lastQuestionId = nextQId;
                 nextQuestion = questionBank.phase1.find(q => q.id === nextQId);
             } else if (sessionData.phase2Ids.length > 0) {
+                sessionData.phase = 2;
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
                 const [top, second, third] = sortedScores.map(s => s[0]);
                 const nextScenarioId = sessionData.phase2Ids.shift();
-                sessionData.lastQuestionId = nextScenarioId; // Track the ID
+                sessionData.lastQuestionId = nextScenarioId;
                 const nextScenarioData = questionBank.phase2.find(q => q.id === nextScenarioId);
                 nextQuestion = { scenario: nextScenarioData.scenario, options: [nextScenarioData.options.find(o => o.domain === top), nextScenarioData.options.find(o => o.domain === second), nextScenarioData.options.find(o => o.domain === third)] };
             } else {
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
-                const primaryDomain = sortedScores[0][0];
-                sessionData.primaryDomain = primaryDomain;
+                sessionData.primaryDomain = sortedScores[0][0];
                 await kv.set(sessionId, sessionData);
                 return response.status(200).json({ 
                     status: 'startArchetypePhase', 
-                    primaryDomain: questionBank.domains[primaryDomain],
+                    primaryDomain: questionBank.domains[sessionData.primaryDomain],
                     questionNumber: sessionData.questionNumber
                 });
             }
@@ -91,7 +117,6 @@ export default async function handler(request, response) {
         }
 
         if (action === 'startArchetypeTest') {
-             // This action now just fetches the first question
             let sessionData = await kv.get(sessionId);
             const primaryDomain = sessionData.primaryDomain;
             sessionData.phase = 3;
@@ -101,7 +126,7 @@ export default async function handler(request, response) {
             archetypes.forEach(arch => { sessionData.archetypeScores[arch] = 0; });
             
             const nextQId = sessionData.phase3Ids.shift();
-            sessionData.lastQuestionId = nextQId; // Track ID
+            sessionData.lastQuestionId = nextQId;
             const nextQData = questionBank.phase3.find(q => q.id === nextQId);
             const firstPhase3Question = { scenario: nextQData.scenario, options: nextQData.optionsByDomain[primaryDomain] };
             
@@ -114,10 +139,19 @@ export default async function handler(request, response) {
             });
         }
 
-
         if (action === 'submitArchetypeRanking') {
             let sessionData = await kv.get(sessionId);
-            sessionData.history.push(JSON.parse(JSON.stringify(sessionData)));
+            
+            const historyState = {
+                scores: JSON.parse(JSON.stringify(sessionData.scores)),
+                archetypeScores: JSON.parse(JSON.stringify(sessionData.archetypeScores)),
+                questionNumber: sessionData.questionNumber,
+                phase: sessionData.phase,
+                phase3Ids: sessionData.phase3Ids ? [...sessionData.phase3Ids] : undefined,
+                lastQuestionId: sessionData.lastQuestionId
+            };
+            if (!sessionData.history) sessionData.history = [];
+            sessionData.history.push(historyState);
 
             const { rankedArchetypes } = payload;
             const numArchetypes = rankedArchetypes.length;
@@ -129,7 +163,7 @@ export default async function handler(request, response) {
 
             if (sessionData.phase3Ids.length > 0) {
                 const nextQId = sessionData.phase3Ids.shift();
-                sessionData.lastQuestionId = nextQId; // Track ID
+                sessionData.lastQuestionId = nextQId;
                 const nextQData = questionBank.phase3.find(q => q.id === nextQId);
                 const nextQ = { scenario: nextQData.scenario, options: nextQData.optionsByDomain[sessionData.primaryDomain] };
                 await kv.set(sessionId, sessionData);
