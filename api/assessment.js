@@ -178,18 +178,35 @@ export default async function handler(request, response) {
                 console.log('Phase 2 question constructed successfully');
             
             } else {
-                console.log('PHASE 2 COMPLETE: Showing domain results');
+                // --- FIX IS HERE ---
+                // Phase 2 is complete. Instead of returning 'domainResults', we now
+                // immediately prepare and send the first question for Phase 3.
+                console.log('PHASE 2 COMPLETE: Transitioning to Phase 3');
+                sessionData.questionNumber++; // Increment to 19
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
-                sessionData.primaryDomain = sortedScores[0][0];
-                console.log('Primary domain determined:', sessionData.primaryDomain);
+                const primaryDomain = sortedScores[0][0];
+                sessionData.primaryDomain = primaryDomain;
+                sessionData.phase = 3;
+                sessionData.phase3Ids = questionBank.phase3.map(q => q.id);
+                sessionData.archetypeScores = {};
+                const archetypes = Object.keys(questionBank.archetypes[primaryDomain]);
+                archetypes.forEach(arch => { sessionData.archetypeScores[arch] = 0; });
+                
+                const nextQId = sessionData.phase3Ids.shift();
+                sessionData.lastQuestionId = nextQId;
+                const nextQData = questionBank.phase3.find(q => q.id === nextQId);
+                const firstPhase3Question = { scenario: nextQData.scenario, options: nextQData.optionsByDomain[primaryDomain] };
                 
                 await kv.set(sessionId, sessionData);
-                console.log('Session data saved successfully');
+                console.log('Session data saved, sending first Phase 3 question');
                 
                 return response.status(200).json({ 
-                    status: 'domainResults', 
-                    primaryDomain: sessionData.primaryDomain
+                    status: 'archetypeQuestion', 
+                    question: { ...firstPhase3Question, options: firstPhase3Question.options.sort(() => 0.5 - Math.random()) },
+                    primaryDomain: questionBank.domains[primaryDomain],
+                    questionNumber: sessionData.questionNumber
                 });
+                // --- END FIX ---
             }
 
             console.log('=== SAVING SESSION AND SENDING RESPONSE ===');
@@ -213,30 +230,6 @@ export default async function handler(request, response) {
         }
 
         // ... rest of your actions (startArchetypeTest, submitArchetypeRanking, etc.)
-        if (action === 'startArchetypeTest') {
-            let sessionData = await kv.get(sessionId);
-            const primaryDomain = sessionData.primaryDomain;
-            sessionData.phase = 3;
-            sessionData.questionNumber++;
-            sessionData.phase3Ids = questionBank.phase3.map(q => q.id);
-            sessionData.archetypeScores = {};
-            const archetypes = Object.keys(questionBank.archetypes[primaryDomain]);
-            archetypes.forEach(arch => { sessionData.archetypeScores[arch] = 0; });
-            
-            const nextQId = sessionData.phase3Ids.shift();
-            sessionData.lastQuestionId = nextQId;
-            const nextQData = questionBank.phase3.find(q => q.id === nextQId);
-            const firstPhase3Question = { scenario: nextQData.scenario, options: nextQData.optionsByDomain[primaryDomain] };
-            
-            await kv.set(sessionId, sessionData);
-            return response.status(200).json({ 
-                status: 'archetypeQuestion', 
-                question: { ...firstPhase3Question, options: firstPhase3Question.options.sort(() => 0.5 - Math.random()) },
-                primaryDomain: questionBank.domains[primaryDomain],
-                questionNumber: sessionData.questionNumber
-            });
-        }
-
         if (action === 'submitArchetypeRanking') {
             let sessionData = await kv.get(sessionId);
             
