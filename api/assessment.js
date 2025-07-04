@@ -85,25 +85,47 @@ export default async function handler(request, response) {
             }
             
             let nextQuestion;
-            // --- NEW ROBUST LOGIC ---
+            // --- FIXED LOGIC ---
             if (sessionData.questionNumber < 8) {
-                // In Phase 1
+                // In Phase 1 (questions 1-8)
                 sessionData.questionNumber++;
                 const nextQId = sessionData.phase1Ids[sessionData.questionNumber - 1];
                 sessionData.lastQuestionId = nextQId;
                 nextQuestion = questionBank.phase1.find(q => q.id === nextQId);
 
             } else if (sessionData.questionNumber < 18) {
-                // In Phase 2
+                // In Phase 2 (questions 9-18)
                 sessionData.questionNumber++;
                 sessionData.phase = 2;
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
                 const [top, second, third] = sortedScores.map(s => s[0]);
-                // Use questionNumber to index into the shuffled phase2Ids array
-                const nextScenarioId = sessionData.phase2Ids[sessionData.questionNumber - 9];
+                
+                // FIXED: Correct array indexing for phase 2
+                // For question 9, we want index 0; for question 18, we want index 9
+                const phase2Index = sessionData.questionNumber - 9;
+                const nextScenarioId = sessionData.phase2Ids[phase2Index];
+                
+                if (!nextScenarioId) {
+                    console.error(`No scenario ID found at phase2Index: ${phase2Index}, questionNumber: ${sessionData.questionNumber}`);
+                    return response.status(500).json({ error: "Phase 2 question not found." });
+                }
+                
                 sessionData.lastQuestionId = nextScenarioId;
                 const nextScenarioData = questionBank.phase2.find(q => q.id === nextScenarioId);
-                nextQuestion = { scenario: nextScenarioData.scenario, options: [nextScenarioData.options.find(o => o.domain === top), nextScenarioData.options.find(o => o.domain === second), nextScenarioData.options.find(o => o.domain === third)] };
+                
+                if (!nextScenarioData) {
+                    console.error(`No scenario data found for ID: ${nextScenarioId}`);
+                    return response.status(500).json({ error: "Phase 2 scenario not found." });
+                }
+                
+                nextQuestion = { 
+                    scenario: nextScenarioData.scenario, 
+                    options: [
+                        nextScenarioData.options.find(o => o.domain === top), 
+                        nextScenarioData.options.find(o => o.domain === second), 
+                        nextScenarioData.options.find(o => o.domain === third)
+                    ] 
+                };
             
             } else {
                 // Phase 2 is complete, show domain results
@@ -117,7 +139,11 @@ export default async function handler(request, response) {
             }
 
             await kv.set(sessionId, sessionData);
-            return response.status(200).json({ status: 'nextQuestion', question: { ...nextQuestion, options: nextQuestion.options.sort(() => 0.5 - Math.random()) }, questionNumber: sessionData.questionNumber });
+            return response.status(200).json({ 
+                status: 'nextQuestion', 
+                question: { ...nextQuestion, options: nextQuestion.options.sort(() => 0.5 - Math.random()) }, 
+                questionNumber: sessionData.questionNumber 
+            });
         }
 
         if (action === 'startArchetypeTest') {
@@ -194,6 +220,7 @@ export default async function handler(request, response) {
         return response.status(400).json({ error: "Invalid action." });
     } catch (error) {
         console.error("API Error:", error);
-        return response.status(500).json({ error: 'An internal error occurred.' });
+        console.error("Error stack:", error.stack);
+        return response.status(500).json({ error: 'An internal error occurred: ' + error.message });
     }
 }
