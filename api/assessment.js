@@ -18,10 +18,10 @@ export default async function handler(request, response) {
                 phase: 1,
                 phase1Ids: questionBank.phase1.map(q => q.id),
                 phase2Ids: questionBank.phase2.map(q => q.id).sort(() => 0.5 - Math.random()),
-                history: [] // Initialize history
+                history: [] 
             };
-            const firstQuestionId = sessionData.phase1Ids.shift();
-            sessionData.lastQuestionId = firstQuestionId; // Track first question ID
+            const firstQuestionId = sessionData.phase1Ids[0]; // Peek at the first ID
+            sessionData.lastQuestionId = firstQuestionId;
             const firstQuestion = questionBank.phase1.find(q => q.id === firstQuestionId);
             await kv.set(newSessionId, sessionData);
             return response.status(200).json({ sessionId: newSessionId, question: { ...firstQuestion, options: firstQuestion.options.sort(() => 0.5 - Math.random()) }, questionNumber: 1 });
@@ -83,32 +83,37 @@ export default async function handler(request, response) {
             for (const domain in answers) {
                 sessionData.scores[domain] += answers[domain];
             }
-            sessionData.questionNumber++;
             
             let nextQuestion;
-            if (sessionData.phase1Ids.length > 0) {
-                const nextQId = sessionData.phase1Ids.shift();
+            // --- NEW ROBUST LOGIC ---
+            if (sessionData.questionNumber < 8) {
+                // In Phase 1
+                sessionData.questionNumber++;
+                const nextQId = sessionData.phase1Ids[sessionData.questionNumber - 1];
                 sessionData.lastQuestionId = nextQId;
                 nextQuestion = questionBank.phase1.find(q => q.id === nextQId);
-            } else if (sessionData.phase2Ids.length > 0) {
+
+            } else if (sessionData.questionNumber < 18) {
+                // In Phase 2
+                sessionData.questionNumber++;
                 sessionData.phase = 2;
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
                 const [top, second, third] = sortedScores.map(s => s[0]);
-                const nextScenarioId = sessionData.phase2Ids.shift();
+                // Use questionNumber to index into the shuffled phase2Ids array
+                const nextScenarioId = sessionData.phase2Ids[sessionData.questionNumber - 9];
                 sessionData.lastQuestionId = nextScenarioId;
                 const nextScenarioData = questionBank.phase2.find(q => q.id === nextScenarioId);
                 nextQuestion = { scenario: nextScenarioData.scenario, options: [nextScenarioData.options.find(o => o.domain === top), nextScenarioData.options.find(o => o.domain === second), nextScenarioData.options.find(o => o.domain === third)] };
+            
             } else {
-                // --- FIX IS HERE ---
-                // The previous logic was incorrect. This now correctly sends the expected status.
+                // Phase 2 is complete, show domain results
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
                 sessionData.primaryDomain = sortedScores[0][0];
                 await kv.set(sessionId, sessionData);
                 return response.status(200).json({ 
-                    status: 'domainResults', // This is the status the frontend expects
+                    status: 'domainResults', 
                     primaryDomain: sessionData.primaryDomain
                 });
-                // --- END FIX ---
             }
 
             await kv.set(sessionId, sessionData);
@@ -119,6 +124,7 @@ export default async function handler(request, response) {
             let sessionData = await kv.get(sessionId);
             const primaryDomain = sessionData.primaryDomain;
             sessionData.phase = 3;
+            sessionData.questionNumber++; // Now at question 19
             sessionData.phase3Ids = questionBank.phase3.map(q => q.id);
             sessionData.archetypeScores = {};
             const archetypes = Object.keys(questionBank.archetypes[primaryDomain]);
@@ -158,9 +164,9 @@ export default async function handler(request, response) {
                 const points = numArchetypes - index;
                 sessionData.archetypeScores[archetype] += points;
             });
-            sessionData.questionNumber++;
-
+            
             if (sessionData.phase3Ids.length > 0) {
+                sessionData.questionNumber++;
                 const nextQId = sessionData.phase3Ids.shift();
                 sessionData.lastQuestionId = nextQId;
                 const nextQData = questionBank.phase3.find(q => q.id === nextQId);
