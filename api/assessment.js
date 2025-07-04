@@ -33,14 +33,12 @@ export default async function handler(request, response) {
                 return response.status(400).json({ error: "No history to revert to." });
             }
             
-            // Pop the previous state from history
             const previousState = sessionData.history.pop();
             
-            // Reconstruct the full session object from the previous state
             const restoredSessionData = {
-                ...sessionData, // a good base
-                ...previousState, // overwrite with historical data
-                history: sessionData.history // ensure we use the now-shortened history
+                ...sessionData,
+                ...previousState,
+                history: sessionData.history
             };
 
             await kv.set(sessionId, restoredSessionData);
@@ -69,7 +67,6 @@ export default async function handler(request, response) {
             let sessionData = await kv.get(sessionId);
             if (!sessionData) return response.status(404).json({ error: "Session not found." });
 
-            // UPDATED: Create a lean snapshot for history, preventing bloat.
             const historyState = {
                 scores: JSON.parse(JSON.stringify(sessionData.scores)),
                 archetypeScores: JSON.parse(JSON.stringify(sessionData.archetypeScores)),
@@ -102,14 +99,16 @@ export default async function handler(request, response) {
                 const nextScenarioData = questionBank.phase2.find(q => q.id === nextScenarioId);
                 nextQuestion = { scenario: nextScenarioData.scenario, options: [nextScenarioData.options.find(o => o.domain === top), nextScenarioData.options.find(o => o.domain === second), nextScenarioData.options.find(o => o.domain === third)] };
             } else {
+                // --- FIX IS HERE ---
+                // The previous logic was incorrect. This now correctly sends the expected status.
                 const sortedScores = Object.entries(sessionData.scores).sort((a, b) => b[1] - a[1]);
                 sessionData.primaryDomain = sortedScores[0][0];
                 await kv.set(sessionId, sessionData);
                 return response.status(200).json({ 
-                    status: 'startArchetypePhase', 
-                    primaryDomain: questionBank.domains[sessionData.primaryDomain],
-                    questionNumber: sessionData.questionNumber
+                    status: 'domainResults', // This is the status the frontend expects
+                    primaryDomain: sessionData.primaryDomain
                 });
+                // --- END FIX ---
             }
 
             await kv.set(sessionId, sessionData);
