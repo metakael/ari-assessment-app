@@ -12,7 +12,6 @@
         body { font-family: 'Inter', sans-serif; background-color: #212121; }
         .font-pixel { font-family: 'Press Start 2P', cursive; }
         
-        /* UPDATED: Your New Color Palette */
         .domain-mentis { --domain-color: #F4E2BA; } 
         .domain-imperii { --domain-color: #F3A299; }
         .domain-operis { --domain-color: #679594; } 
@@ -27,7 +26,12 @@
         .ranking-item { transition: all 0.2s ease-in-out; }
 
         .pixel-box { border: 4px solid #4f4f4f; box-shadow: inset -4px -4px 0px 0px #2f2f2f, inset 4px 4px 0px 0px #a8a8a8; background-color: #7b7b7b; image-rendering: pixelated; }
-        .pixel-box-inner { border: 4px solid #4f4f4f; background-color: #c6c6c6; color: #1e1e1e; }
+        /* CHANGE 2: Updated results box inner style */
+        .pixel-box-inner { 
+            border: 4px solid #4f4f4f; 
+            background-color: #374151; /* Dark Slate */
+            color: #d1d5db; /* Light Gray */
+        }
 
         #symbol-sprite-container {
             width: 96px;
@@ -88,7 +92,9 @@
                 </div>
             </div>
 
-            <div class="mt-8 flex justify-end">
+            <!-- UPDATED: Added Back button -->
+            <div class="mt-8 flex justify-between items-center">
+                <button @click="goBack" :disabled="questionNumber === 1 || isSubmitting" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-700 disabled:cursor-not-allowed">Back</button>
                 <button @click="submitAnswer" :disabled="isSubmitting || (screen === 'assessment' && totalPoints !== 10)" class="bg-teal-600 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-600">Submit</button>
             </div>
         </div>
@@ -146,8 +152,7 @@
                     isSubmitting.value = true;
                     errorMessage.value = null; 
                     try {
-                        const endpoint = body.action === 'sendProfile' ? '/api/send-report' : '/api/assessment';
-                        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                        const response = await fetch('/api/assessment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                         if (!response.ok) {
                             const errorData = await response.json().catch(() => ({error: 'An unknown server error occurred.'}));
                             throw new Error(errorData.error || `The server responded with an error (${response.status}). Please try again.`);
@@ -214,10 +219,8 @@
                         rankedOptions.value = [...data.question.options];
                         screen.value = 'archetypeAssessment';
                     } else {
-                         const numOptions = data.question.options.length;
-                         points.value = Array(numOptions).fill(Math.floor(10 / numOptions));
-                         let remainder = 10 % numOptions;
-                         for(let i=0; i<remainder; i++) { points.value[i]++; }
+                         // CHANGE 3: Set default points to 0
+                         points.value = Array(data.question.options.length).fill(0);
                          screen.value = 'assessment';
                     }
                 };
@@ -229,9 +232,17 @@
                     rankedOptions.value.splice(newIndex, 0, item);
                 };
                 
+                // NEW: Function for the Back button
+                const goBack = async () => {
+                    const data = await apiCall({ action: 'goBack', sessionId: sessionId.value });
+                    if(data && data.question) {
+                        handleNewQuestion(data);
+                    }
+                };
+
                 const resetTest = () => { screen.value = 'start'; isSubmitting.value = false; errorMessage.value = null; };
 
-                return { screen, isSubmitting, sessionId, currentQuestion, questionNumber, points, rankedOptions, totalPoints, primaryDomain, finalArchetype, profileData, domainInfo, archetypeInfo, archetypeSpriteSrc, startTest, updatePoints, submitAnswer, resetTest, moveRank };
+                return { screen, isSubmitting, sessionId, currentQuestion, questionNumber, points, rankedOptions, totalPoints, primaryDomain, finalArchetype, profileData, domainInfo, archetypeInfo, archetypeSpriteSrc, startTest, updatePoints, submitAnswer, resetTest, moveRank, goBack };
             }
         });
         app.mount('#app');
