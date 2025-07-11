@@ -52,7 +52,6 @@
             <button @click="startTest" class="mt-8 font-pixel text-center w-full max-w-xs mx-auto bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 border-2 border-gray-500 shadow-md" :disabled="isSubmitting">{{ isSubmitting ? 'Initialising...' : 'Begin Assessment' }}</button>
         </div>
 
-        <!-- NEW: Instruction Screen 1 -->
         <div v-if="screen === 'instruction1'" class="text-center bg-gray-800 p-8 rounded-2xl shadow-2xl">
             <h1 class="font-pixel text-2xl md:text-3xl text-white mb-4">Instructions</h1>
             <div class="text-left bg-gray-900/50 p-4 rounded-lg border border-gray-600 text-sm text-gray-300 space-y-3">
@@ -63,7 +62,6 @@
             <button @click="proceedToAssessment" class="mt-8 font-pixel text-center w-full max-w-xs mx-auto bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 border-2 border-gray-500 shadow-md">Continue</button>
         </div>
         
-        <!-- NEW: Instruction Screen 2 (for ranking) -->
         <div v-if="screen === 'instruction2'" class="text-center bg-gray-800 p-8 rounded-2xl shadow-2xl">
             <h1 class="font-pixel text-2xl md:text-3xl text-white mb-4">Instructions</h1>
             <div class="text-left bg-gray-900/50 p-4 rounded-lg border border-gray-600 text-sm text-gray-300 space-y-3">
@@ -99,6 +97,8 @@
             </div>
 
             <div v-if="screen === 'archetypeAssessment'" class="space-y-2">
+                <!-- UPDATED: This reminder is now always present in the archetype assessment view -->
+                <p class="text-gray-400 mb-4 text-center italic">Rank the following from <strong>Most like you</strong> (top) to <strong>Least like you</strong> (bottom).</p>
                 <div v-for="(option, index) in rankedOptions" :key="option.archetype" class="ranking-item flex items-center justify-between p-4 bg-gray-700/50 rounded-lg border border-gray-600">
                     <span class="font-bold text-lg mr-4 text-teal-300">{{ index + 1 }}</span>
                     <span class="flex-grow text-white">{{ option.text }}</span>
@@ -187,11 +187,10 @@
                     if (data && data.question) { 
                         sessionId.value = data.sessionId; 
                         handleNewQuestion(data); 
-                        screen.value = 'instruction1'; // Go to instructions first
+                        screen.value = 'instruction1';
                     }
                 };
                 
-                // NEW: Functions to proceed from instruction screens
                 const proceedToAssessment = () => {
                     screen.value = 'assessment';
                 };
@@ -231,8 +230,13 @@
                      if (!data) return;
                      if (data.status === 'nextQuestion') { handleNewQuestion(data); }
                      else if (data.status === 'archetypeQuestion') { 
-                         handleNewQuestion(data); 
-                         screen.value = 'instruction2'; // Go to ranking instructions
+                         handleNewQuestion(data);
+                         // UPDATED: Conditional logic for instruction screen
+                         if (data.questionNumber === 19) {
+                             screen.value = 'instruction2';
+                         } else {
+                             screen.value = 'archetypeAssessment';
+                         }
                      }
                      else if (data.status === 'finalResults') {
                          primaryDomain.value = data.primaryDomain;
@@ -248,7 +252,6 @@
                     if (data.status === 'archetypeQuestion') {
                         primaryDomain.value = data.primaryDomain;
                         rankedOptions.value = [...data.question.options];
-                        // Don't switch screen here, wait for user to click through instructions
                     } else {
                          points.value = Array(data.question.options.length).fill(0);
                          screen.value = 'assessment';
