@@ -26,12 +26,7 @@
         .ranking-item { transition: all 0.2s ease-in-out; }
 
         .pixel-box { border: 4px solid #4f4f4f; box-shadow: inset -4px -4px 0px 0px #2f2f2f, inset 4px 4px 0px 0px #a8a8a8; background-color: #7b7b7b; image-rendering: pixelated; }
-        /* CHANGE 2: Updated results box inner style */
-        .pixel-box-inner { 
-            border: 4px solid #4f4f4f; 
-            background-color: #374151; /* Dark Slate */
-            color: #d1d5db; /* Light Gray */
-        }
+        .pixel-box-inner { border: 4px solid #4f4f4f; background-color: #374151; color: #d1d5db; }
 
         #symbol-sprite-container {
             width: 96px;
@@ -54,8 +49,30 @@
             <div v-if="errorMessage" class="mt-4 p-3 bg-red-800/50 border border-red-600 rounded-lg text-red-300 text-sm">
                 <strong>Error:</strong> {{ errorMessage }}
             </div>
-            <button @click="startTest" class="mt-8 font-pixel text-center w-full max-w-xs mx-auto bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 border-2 border-gray-500 shadow-md" :disabled="isSubmitting">{{ isSubmitting ? 'Initializing...' : 'Begin Assessment' }}</button>
+            <button @click="startTest" class="mt-8 font-pixel text-center w-full max-w-xs mx-auto bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 border-2 border-gray-500 shadow-md" :disabled="isSubmitting">{{ isSubmitting ? 'Initialising...' : 'Begin Assessment' }}</button>
         </div>
+
+        <!-- NEW: Instruction Screen 1 -->
+        <div v-if="screen === 'instruction1'" class="text-center bg-gray-800 p-8 rounded-2xl shadow-2xl">
+            <h1 class="font-pixel text-2xl md:text-3xl text-white mb-4">Instructions</h1>
+            <div class="text-left bg-gray-900/50 p-4 rounded-lg border border-gray-600 text-sm text-gray-300 space-y-3">
+                <p>For the first part of the assessment, you will be presented with a series of scenarios.</p>
+                <p>For each scenario, you must distribute a total of <strong class="text-teal-300">10 points</strong> among three different approaches based on what feels most natural to you.</p>
+                <p>You can give all 10 points to one option, or split them however you see fit. Ensure the total always adds up to 10 before submitting.</p>
+            </div>
+            <button @click="proceedToAssessment" class="mt-8 font-pixel text-center w-full max-w-xs mx-auto bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 border-2 border-gray-500 shadow-md">Continue</button>
+        </div>
+        
+        <!-- NEW: Instruction Screen 2 (for ranking) -->
+        <div v-if="screen === 'instruction2'" class="text-center bg-gray-800 p-8 rounded-2xl shadow-2xl">
+            <h1 class="font-pixel text-2xl md:text-3xl text-white mb-4">Instructions</h1>
+            <div class="text-left bg-gray-900/50 p-4 rounded-lg border border-gray-600 text-sm text-gray-300 space-y-3">
+                <p>You are now entering the final section of the assessment.</p>
+                <p>The scoring method will now change. For the remaining scenarios, you will be asked to <strong class="text-teal-300">rank the set of options</strong> from "Most like you" to "Least like you" using the arrow buttons.</p>
+            </div>
+            <button @click="proceedToArchetypeAssessment" class="mt-8 font-pixel text-center w-full max-w-xs mx-auto bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 border-2 border-gray-500 shadow-md">Continue</button>
+        </div>
+
 
         <div v-if="screen === 'assessment' || screen === 'archetypeAssessment'" class="bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl">
              <div class="mb-8">
@@ -67,6 +84,7 @@
                     <div class="bg-teal-500 h-2.5 rounded-full" :style="{ width: (questionNumber / 25) * 100 + '%' }"></div>
                 </div>
             </div>
+            
             <h2 class="text-xl font-semibold text-white mb-2">Scenario:</h2>
             <p class="text-gray-300 mb-8">{{ currentQuestion.scenario }}</p>
 
@@ -81,7 +99,6 @@
             </div>
 
             <div v-if="screen === 'archetypeAssessment'" class="space-y-2">
-                <p class="text-gray-400 mb-4 text-center">Rank the following from <strong>Most like you</strong> (top) to <strong>Least like you</strong> (bottom).</p>
                 <div v-for="(option, index) in rankedOptions" :key="option.archetype" class="ranking-item flex items-center justify-between p-4 bg-gray-700/50 rounded-lg border border-gray-600">
                     <span class="font-bold text-lg mr-4 text-teal-300">{{ index + 1 }}</span>
                     <span class="flex-grow text-white">{{ option.text }}</span>
@@ -92,7 +109,6 @@
                 </div>
             </div>
 
-            <!-- UPDATED: Added Back button -->
             <div class="mt-8 flex justify-between items-center">
                 <button @click="goBack" :disabled="questionNumber === 1 || isSubmitting" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-700 disabled:cursor-not-allowed">Back</button>
                 <button @click="submitAnswer" :disabled="isSubmitting || (screen === 'assessment' && totalPoints !== 10)" class="bg-teal-600 text-white font-bold py-2 px-6 rounded-lg disabled:bg-gray-600">Submit</button>
@@ -168,7 +184,19 @@
                 
                 const startTest = async () => {
                     const data = await apiCall({ action: 'start' });
-                    if (data && data.question) { sessionId.value = data.sessionId; handleNewQuestion(data); }
+                    if (data && data.question) { 
+                        sessionId.value = data.sessionId; 
+                        handleNewQuestion(data); 
+                        screen.value = 'instruction1'; // Go to instructions first
+                    }
+                };
+                
+                // NEW: Functions to proceed from instruction screens
+                const proceedToAssessment = () => {
+                    screen.value = 'assessment';
+                };
+                const proceedToArchetypeAssessment = () => {
+                    screen.value = 'archetypeAssessment';
                 };
 
                 const updatePoints = (index) => {
@@ -202,7 +230,10 @@
                 const handleBackendResponse = (data) => {
                      if (!data) return;
                      if (data.status === 'nextQuestion') { handleNewQuestion(data); }
-                     else if (data.status === 'archetypeQuestion') { handleNewQuestion(data); }
+                     else if (data.status === 'archetypeQuestion') { 
+                         handleNewQuestion(data); 
+                         screen.value = 'instruction2'; // Go to ranking instructions
+                     }
                      else if (data.status === 'finalResults') {
                          primaryDomain.value = data.primaryDomain;
                          finalArchetype.value = data.finalArchetype.charAt(0).toUpperCase() + data.finalArchetype.slice(1);
@@ -217,9 +248,8 @@
                     if (data.status === 'archetypeQuestion') {
                         primaryDomain.value = data.primaryDomain;
                         rankedOptions.value = [...data.question.options];
-                        screen.value = 'archetypeAssessment';
+                        // Don't switch screen here, wait for user to click through instructions
                     } else {
-                         // CHANGE 3: Set default points to 0
                          points.value = Array(data.question.options.length).fill(0);
                          screen.value = 'assessment';
                     }
@@ -232,7 +262,6 @@
                     rankedOptions.value.splice(newIndex, 0, item);
                 };
                 
-                // NEW: Function for the Back button
                 const goBack = async () => {
                     const data = await apiCall({ action: 'goBack', sessionId: sessionId.value });
                     if(data && data.question) {
@@ -242,7 +271,7 @@
 
                 const resetTest = () => { screen.value = 'start'; isSubmitting.value = false; errorMessage.value = null; };
 
-                return { screen, isSubmitting, sessionId, currentQuestion, questionNumber, points, rankedOptions, totalPoints, primaryDomain, finalArchetype, profileData, domainInfo, archetypeInfo, archetypeSpriteSrc, startTest, updatePoints, submitAnswer, resetTest, moveRank, goBack };
+                return { screen, isSubmitting, sessionId, currentQuestion, questionNumber, points, rankedOptions, totalPoints, primaryDomain, finalArchetype, profileData, domainInfo, archetypeInfo, archetypeSpriteSrc, startTest, updatePoints, submitAnswer, resetTest, moveRank, goBack, proceedToAssessment, proceedToArchetypeAssessment };
             }
         });
         app.mount('#app');
