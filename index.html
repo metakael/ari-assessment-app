@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Impact Archetype | Assessment</title>
+    <!-- UPDATED: Title Change -->
+    <title>Team Impact Archetype Resonance Index | Assessment</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,11 +45,10 @@
     <div id="app" class="w-full max-w-2xl mx-auto" v-cloak>
         
         <div v-if="screen === 'start'" class="text-center bg-gray-800 p-8 rounded-2xl shadow-2xl">
-            <h1 class="font-pixel text-2xl md:text-3xl text-white mb-4">Archetype Resonance Index</h1>
+            <!-- UPDATED: Name Change -->
+            <h1 class="font-pixel text-2xl md:text-3xl text-white mb-4 leading-relaxed">Team Impact<br>Archetype Resonance Index</h1>
             <p class="text-lg text-gray-400">Ever wondered what your natural contribution to a team is? Find out which Archetype you resonate most with and how you might best lead a team.</p>
-            <div v-if="errorMessage" class="mt-4 p-3 bg-red-800/50 border border-red-600 rounded-lg text-red-300 text-sm">
-                <strong>Error:</strong> {{ errorMessage }}
-            </div>
+            <div v-if="errorMessage" class="mt-4 p-3 bg-red-800/50 border border-red-600 rounded-lg text-red-300 text-sm"><strong>Error:</strong> {{ errorMessage }}</div>
             <button @click="startTest" class="mt-8 font-pixel text-center w-full max-w-xs mx-auto bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 border-2 border-gray-500 shadow-md" :disabled="isSubmitting">{{ isSubmitting ? 'Initialising...' : 'Begin Assessment' }}</button>
         </div>
 
@@ -57,7 +57,6 @@
             <div class="text-left bg-gray-900/50 p-4 rounded-lg border border-gray-600 text-sm text-gray-300 space-y-3">
                 <p>For the first part of the assessment, you will be presented with a series of scenarios.</p>
                 <p>For each scenario, you must distribute a total of <strong class="text-teal-300">10 points</strong> among three different approaches based on what feels most natural to you.</p>
-                <p>You can give all 10 points to one option, or split them however you see fit. Ensure the total always adds up to 10 before submitting.</p>
             </div>
             <button @click="proceedToAssessment" class="mt-8 font-pixel text-center w-full max-w-xs mx-auto bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 border-2 border-gray-500 shadow-md">Continue</button>
         </div>
@@ -66,15 +65,15 @@
             <h1 class="font-pixel text-2xl md:text-3xl text-white mb-4">Instructions</h1>
             <div class="text-left bg-gray-900/50 p-4 rounded-lg border border-gray-600 text-sm text-gray-300 space-y-3">
                 <p>You are now entering the final section of the assessment.</p>
-                <p>The scoring method will now change. For the remaining scenarios, you will be asked to <strong class="text-teal-300">rank the set of options</strong> from "Most like you" to "Least like you" using the arrow buttons.</p>
+                <p>The scoring method will now change. For the remaining scenarios, you will be asked to <strong class="text-teal-300">rank the set of options</strong> from "Most like you" to "Least like you".</p>
             </div>
             <button @click="proceedToArchetypeAssessment" class="mt-8 font-pixel text-center w-full max-w-xs mx-auto bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 border-2 border-gray-500 shadow-md">Continue</button>
         </div>
 
-
         <div v-if="screen === 'assessment' || screen === 'archetypeAssessment'" class="bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl">
              <div class="mb-8">
-                <h1 class="font-pixel text-center text-xl font-bold text-white mb-4">Archetype Resonance Index</h1>
+                <!-- UPDATED: Name Change -->
+                <h1 class="font-pixel text-center text-lg font-bold text-white mb-4">Team Impact ARI</h1>
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-sm font-medium text-gray-400">Question {{ questionNumber }} / 25</span>
                 </div>
@@ -82,7 +81,6 @@
                     <div class="bg-teal-500 h-2.5 rounded-full" :style="{ width: (questionNumber / 25) * 100 + '%' }"></div>
                 </div>
             </div>
-            
             <h2 class="text-xl font-semibold text-white mb-2">Scenario:</h2>
             <p class="text-gray-300 mb-8">{{ currentQuestion.scenario }}</p>
 
@@ -97,8 +95,7 @@
             </div>
 
             <div v-if="screen === 'archetypeAssessment'" class="space-y-2">
-                <!-- UPDATED: This reminder is now always present in the archetype assessment view -->
-                <p class="text-gray-400 mb-4 text-center italic">Rank the following from <strong>Most like you</strong> (top) to <strong>Least like you</strong> (bottom).</p>
+                <p class="text-gray-400 mb-4 text-center">Rank the following from <strong>Most like you</strong> (top) to <strong>Least like you</strong> (bottom).</p>
                 <div v-for="(option, index) in rankedOptions" :key="option.archetype" class="ranking-item flex items-center justify-between p-4 bg-gray-700/50 rounded-lg border border-gray-600">
                     <span class="font-bold text-lg mr-4 text-teal-300">{{ index + 1 }}</span>
                     <span class="flex-grow text-white">{{ option.text }}</span>
@@ -191,12 +188,8 @@
                     }
                 };
                 
-                const proceedToAssessment = () => {
-                    screen.value = 'assessment';
-                };
-                const proceedToArchetypeAssessment = () => {
-                    screen.value = 'archetypeAssessment';
-                };
+                const proceedToAssessment = () => { screen.value = 'assessment'; };
+                const proceedToArchetypeAssessment = () => { screen.value = 'archetypeAssessment'; };
 
                 const updatePoints = (index) => {
                     let overage = totalPoints.value - 10;
@@ -231,7 +224,6 @@
                      if (data.status === 'nextQuestion') { handleNewQuestion(data); }
                      else if (data.status === 'archetypeQuestion') { 
                          handleNewQuestion(data);
-                         // UPDATED: Conditional logic for instruction screen
                          if (data.questionNumber === 19) {
                              screen.value = 'instruction2';
                          } else {
