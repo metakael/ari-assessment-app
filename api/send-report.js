@@ -95,7 +95,7 @@ export default async function handler(request, response) {
 
         // Prepare email data
         const emailData = {
-            from: 'Team Impact ARI <reports@teamimpact.app>', 
+            from: 'Team Impact ARI <onboarding@resend.dev>', 
             to: [email],
             subject: `Your Team Impact ARI Profile: The ${archetypeTitle}`,
             html: `
