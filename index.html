@@ -139,7 +139,8 @@
                  </div>
                  <div>
                      <label for="email" class="block text-sm font-medium text-gray-300">Email Address</label>
-                     <input type="email" v-model="userForm.email" id="email" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-teal-500 focus:border-teal-500">
+                     <!-- UPDATED: Added a basic email validation pattern -->
+                     <input type="email" v-model="userForm.email" id="email" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-teal-500 focus:border-teal-500" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
                  </div>
                  <button @click="submitProfileRequest" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg" :disabled="isSubmitting || !userForm.firstName || !userForm.email">
                      {{ isSubmitting ? 'Submitting...' : 'Send My Profile' }}
@@ -152,8 +153,8 @@
             </div>
 
             <div class="mt-8 flex flex-col sm:flex-row gap-4">
-                <a href="/#" target="_blank" class="w-full text-center bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg">Learn more about the ARI</a>
-                <button @click="resetTest" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg">Retake Assessment</button>
+                <!-- UPDATED: Removed "Learn More" button, Retake button is now full width -->
+                <button @click="resetTest" class="w-full font-pixel text-center bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg border-2 border-gray-500 shadow-md">RETAKE ASSESSMENT</button>
             </div>
         </div>
     </div>
@@ -191,7 +192,6 @@
                 const domainInfo = computed(() => primaryDomain.value && profileData.value ? { description: profileData.value.domainDescription } : {});
                 const archetypeInfo = computed(() => finalArchetype.value && profileData.value ? { description: profileData.value.teamRole } : {});
 
-                // --- SCRIPT LOGIC IS NOW COMPLETE ---
                 const apiCall = async (body) => {
                     isSubmitting.value = true;
                     errorMessage.value = null; 
