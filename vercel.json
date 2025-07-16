@@ -10,10 +10,6 @@
       "use": "@vercel/node"
     },
     {
-      "src": "api/test-email.js",
-      "use": "@vercel/node"
-    },
-    {
       "src": "public/**",
       "use": "@vercel/static"
     },
@@ -30,10 +26,6 @@
     {
       "src": "/api/send-report",
       "dest": "/api/send-report.js"
-    },
-    {
-      "src": "/api/test-email",
-      "dest": "/api/test-email.js"
     },
     {
       "src": "/sprites/(.*)",
