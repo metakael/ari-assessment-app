@@ -42,6 +42,10 @@
     {
       "src": "/(.*)",
       "dest": "/index.html"
+    },
+    {
+      "src": "/api/manage-data",
+      "dest": "/api/manage-data.js"
     }
   ]
 }
