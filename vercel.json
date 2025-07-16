@@ -1,8 +1,12 @@
 {
-  "version": 2,
+  "version": 3,
   "builds": [
     {
       "src": "api/assessment.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/send-report.js",
       "use": "@vercel/node"
     },
     {
@@ -18,6 +22,10 @@
     {
       "src": "/api/assessment",
       "dest": "/api/assessment.js"
+    },
+    {
+      "src": "/api/send-report",
+      "dest": "/api/send-report.js"
     },
     {
       "src": "/sprites/(.*)",
