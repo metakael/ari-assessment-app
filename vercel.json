@@ -10,6 +10,10 @@
       "use": "@vercel/node"
     },
     {
+      "src": "api/temp-download.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "public/**",
       "use": "@vercel/static"
     },
@@ -26,6 +30,10 @@
     {
       "src": "/api/send-report",
       "dest": "/api/send-report.js"
+    },
+    {
+      "src": "/api/temp-download",
+      "dest": "/api/temp-download.js"
     },
     {
       "src": "/sprites/(.*)",
