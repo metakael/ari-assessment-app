@@ -31,15 +31,27 @@ export default async function handler(request, response) {
                 archetypeScores: {},
                 questionNumber: 1,
                 phase: 1,
-                phase1Ids: questionBank.phase1.map(q => q.id),
+                // ✅ NEW: Randomize question order within each phase
+                phase1Ids: questionBank.phase1.map(q => q.id).sort(() => 0.5 - Math.random()),
                 phase2Ids: questionBank.phase2.map(q => q.id).sort(() => 0.5 - Math.random()),
+                phase3Ids: questionBank.phase3.map(q => q.id).sort(() => 0.5 - Math.random()),
                 history: [] 
             };
             const firstQuestionId = sessionData.phase1Ids[0];
             sessionData.lastQuestionId = firstQuestionId;
             const firstQuestion = questionBank.phase1.find(q => q.id === firstQuestionId);
+            
+            console.log('✅ Questions randomized:');
+            console.log('Phase 1 order:', sessionData.phase1Ids);
+            console.log('Phase 2 order:', sessionData.phase2Ids);
+            console.log('Phase 3 order:', sessionData.phase3Ids);
+            
             await kv.set(newSessionId, sessionData);
-            return response.status(200).json({ sessionId: newSessionId, question: { ...firstQuestion, options: firstQuestion.options.sort(() => 0.5 - Math.random()) }, questionNumber: 1 });
+            return response.status(200).json({ 
+                sessionId: newSessionId, 
+                question: { ...firstQuestion, options: firstQuestion.options.sort(() => 0.5 - Math.random()) }, 
+                questionNumber: 1 
+            });
         }
 
         if (action === 'goBack') {
@@ -102,6 +114,7 @@ export default async function handler(request, response) {
                 phase: sessionData.phase,
                 phase1Ids: [...sessionData.phase1Ids],
                 phase2Ids: [...sessionData.phase2Ids],
+                phase3Ids: sessionData.phase3Ids ? [...sessionData.phase3Ids] : undefined,
                 lastQuestionId: sessionData.lastQuestionId
             };
             if (!sessionData.history) sessionData.history = [];
@@ -221,7 +234,13 @@ export default async function handler(request, response) {
                 const primaryDomain = sortedScores[0][0];
                 sessionData.primaryDomain = primaryDomain;
                 sessionData.phase = 3;
-                sessionData.phase3Ids = questionBank.phase3.map(q => q.id);
+                
+                // ✅ FIXED: Use pre-randomized phase3Ids if available, otherwise randomize
+                if (!sessionData.phase3Ids) {
+                    sessionData.phase3Ids = questionBank.phase3.map(q => q.id).sort(() => 0.5 - Math.random());
+                    console.log('Phase 3 questions randomized:', sessionData.phase3Ids);
+                }
+                
                 sessionData.archetypeScores = {};
                 const archetypes = Object.keys(questionBank.archetypes[primaryDomain]);
                 archetypes.forEach(arch => { sessionData.archetypeScores[arch] = 0; });
