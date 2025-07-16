@@ -1,6 +1,8 @@
 // seed.js
-require('dotenv').config();
-const { kv } = require('@vercel/kv');
+import dotenv from 'dotenv';
+import { kv } from '@vercel/kv';
+
+dotenv.config();
 
 async function seedDatabase() {
     console.log("Starting to seed database with NEW efficient Phase 3 structure...");
@@ -21,111 +23,111 @@ async function seedDatabase() {
         phase1: [ /* ...Phase 1 questions remain the same... */ 
             { 
                 id: 'p1_01', 
-                scenario: "You have just been assigned an important project with an ambitious goal and timeline. You are appointed the leader. What might be your first course of action?", 
+                scenario: "You've just been appointed a leader of a new project, and given some ambitious goals! What might be the first thing you do with the team?", 
                 options: [
-                    {text:"Rally the team around the vision, set clear expectations, and establish the strategic direction.", domain: 'imperii'}, 
-                    {text:"Meet with each team member individually to understand their strengths, concerns, and how they can best contribute.", domain: 'foederis'}, 
-                    {text:"Thoroughly analyse the project requirements, scope, and constraints.", domain: 'mentis'}
+                    {text:"Set a vision and get the team on board with it, setting clear expectations for all.", domain: 'imperii'}, 
+                    {text:"Meet with each team member individually to understand their strengths and concerns.", domain: 'foederis'}, 
+                    {text:"Analyse the project goals, scope, and your team's resources carefully.", domain: 'mentis'}
                 ] 
             },
             { 
                 id: 'p1_02', 
-                scenario: "This is a new team, and people barely know each other. What might you do to establish an effective working relationship quickly?", 
+                scenario: "It's a newly formed team and people don't know each other! What might you do to warm things up?", 
                 options: [
-                    {text:"Create structured opportunities for collaboration through team activities.", domain: 'operis'}, 
-                    {text:"Assess each person's expertise and working style for complementary skills.", domain: 'mentis'}, 
-                    {text:"Organise a team alignment session to establish our shared goals, roles, and relationships.", domain: 'imperii'}
+                    {text:"Run teambuilding sessions.", domain: 'operis'}, 
+                    {text:"Assess each person's expertise and working style to complement each other.", domain: 'mentis'}, 
+                    {text:"Organise a team session to talk about shared goals, roles, and relationships.", domain: 'imperii'}
                 ] 
             },
             { 
                 id: 'p1_03', 
-                scenario: "Two of your most valuable team members are in a heated disagreement about a key aspect of the project, and it's affecting the rest of the team. What might you do?", 
+                scenario: "Two team members are in a heated disagreement, and the rest look a bit uncomfortable. What might you do?", 
                 options: [
-                    {text:"Facilitate a conversation between the two members to find common ground.", domain: 'foederis'}, 
-                    {text:"Establish a structured process for resolving the disagreement.", domain: 'operis'}, 
-                    {text:"Make a decisive call on the direction we'll take and refocus everyone.", domain: 'imperii'}
+                    {text:"Facilitate a private discussion for them to find common ground.", domain: 'foederis'}, 
+                    {text:"Set up a step-by-step process to resolve the disagreement.", domain: 'operis'}, 
+                    {text:"Make the call as the leader, setting the direction we'll take and refocusing everyone.", domain: 'imperii'}
                 ] 
             },
             { 
                 id: 'p1_04', 
-                scenario: "A critical step was missed, and an important stakeholder is very upset. The team is lost on what to do. What might be your next step?", 
+                scenario: "Something went wrong and a partner is really upset. The team is lost on what to do. What might be your next step?", 
                 options: [
-                    {text:"Conduct a thorough analysis of what went wrong and what we can do now.", domain: 'mentis'}, 
-                    {text:"Take ownership of the situation with the stakeholder while simultaneously mobilising the team for recovery.", domain: 'imperii'}, 
-                    {text:"Implement immediate damage control measures through a step-by-step process.", domain: 'operis'}
+                    {text:"Conduct a root-cause analysis of what went wrong and think about what we can do moving forward.", domain: 'mentis'}, 
+                    {text:"Call the partner for damage control, and simultaneously direct the team on what to do for recovery.", domain: 'imperii'}, 
+                    {text:"Implement damage control measures through a structured process.", domain: 'operis'}
                 ] 
             },
             { 
                 id: 'p1_05', 
-                scenario: "It seems like there was a good plan for the project, but as you worked on it, it's proving to be more complex than the team anticipated. What might you do?", 
+                scenario: "The project has shifted quite badly off what was initially planned because of unexpected complexity. What might you do?", 
                 options: [
-                    {text:"Check in with team members about how they're handling the increased complexity and offer support.", domain: 'foederis'}, 
-                    {text:"Reassess the situation by analysing what assumptions were incorrect and if our understanding changes.", domain: 'mentis'}, 
+                    {text:"Check in with team members about how they're handling the increased complexity and offer your support.", domain: 'foederis'}, 
+                    {text:"Reassess our project assumptions and see if our understanding changes, before taking action.", domain: 'mentis'}, 
                     {text:"Redesign our approach with more detailed planning and contingency measures.", domain: 'operis'}
                 ] 
             },
             { 
                 id: 'p1_06', 
-                scenario: "There's a new task that needs to be completed, but no one in your team - including yourself - currently possesses the skill to complete it. What might you do?", 
+                scenario: "There's a new task and no one has the skill to complete it! What might you do?", 
                 options: [
-                    {text:"Identify external experts or resources we can bring in while we develop ourselves.", domain: 'imperii'}, 
+                    {text:"Look for experts or resources to help us immediately, while we take time to grow ourselves.", domain: 'imperii'}, 
                     {text:"Research the skill requirements to understand exactly what expertise we need.", domain: 'mentis'}, 
-                    {text:"Connect with other teams who might have this expertise and be willing to share knowledge.", domain: 'foederis'}
+                    {text:"Connect with other teams who might have this expertise and ask for their favour and help.", domain: 'foederis'}
                 ] 
             },
             { 
                 id: 'p1_07', 
-                scenario: "Your team achieved significant success and there's an opportunity for you to showcase the work to the media. What might you focus your sharing on?", 
+                scenario: "Your project is a success! A journalist is writing a feature on your team and your work. What do you focus the feature on?", 
                 options: [
                     {text:"Your systematic methodology and execution excellence.", domain: 'operis'}, 
                     {text:"Your collaborative team effort and the positive impact our work will have on the community.", domain: 'foederis'}, 
-                    {text:"Your innovative problem-solving approach and key insights that led to solutions.", domain: 'mentis'}
+                    {text:"Your innovative problem-solving approach and key ideas that led to solutions.", domain: 'mentis'}
                 ] 
             },
             { 
                 id: 'p1_08', 
-                scenario: "Some members of your team come up to you and share their gratitude for your leadership. They ask you to mentor them. How might you approach this request?", 
+                scenario: "Some members of your team are grateful for your leadership and ask you to mentor them. How might you approach this request?", 
                 options: [
-                    {text:"Guide them in building leadership capabilities by providing opportunities to lead.", domain: 'imperii'}, 
-                    {text:"Focus on their personal growth and relationship-building skills.", domain: 'foederis'}, 
-                    {text:"Support their professional development through structured goal-setting and skill-building plans.", domain: 'operis'}
+                    {text:"Build their leadership capabilities by providing opportunities to lead.", domain: 'imperii'}, 
+                    {text:"Focus on their relationship-building and networking skills.", domain: 'foederis'}, 
+                    {text:"Co-develop their professional development plans with structured goal-setting and skill-building.", domain: 'operis'}
                 ] 
             },
         ],
         phase2: [ /* ...Phase 2 questions remain the same... */ 
             { 
                 id: 'p2_01', 
-                scenario: "Your team's budget is running out, and you just got word that your grant application was unsuccessful. What might you do next?", 
+                scenario: "The project budget is running out! What might you do next?", 
                 options: [
                     {text:"Analyse our current financial position and research all viable options first.", domain: 'mentis'}, 
-                    {text:"Take immediate action to secure alternative funding while cutting costs.", domain: 'imperii'}, 
-                    {text:"Create a detailed cost-cutting plan and timeline adjustments.", domain: 'operis'}, 
+                    {text:"Take immediate action to get alternative funding and start cutting cost.", domain: 'imperii'}, 
+                    {text:"Create a detailed cost-cutting plan and adjustments to project timeline.", domain: 'operis'}, 
                     {text:"Reach out to network and partners to explore collaborative funding options.", domain: 'foederis'}
                 ] 
             },
             { 
                 id: 'p2_02', 
-                scenario: "One team member consistently delivers subpar work and seems disengaged. His attitude is starting to affect the rest of the team, but he has specialised skills that the team needs. What might you do?", 
+                scenario: "One team member is really not performing and seems disengaged. His attitude is starting to affect the rest of the team, but he has specialised skills that the team needs. What might you do?", 
                 options: [
-                    {text:"Objectively assess the situation by documenting specific performance issues.", domain: 'mentis'}, 
-                    {text:"Have a direct conversation about performance shortfall and expect improvement.", domain: 'imperii'}, 
+                    {text:"Be objective. Document specific performance issues as you assess further.", domain: 'mentis'}, 
+                    {text:"Have a direct 1:1 conversation about performance issues and set expectations for improvement.", domain: 'imperii'}, 
                     {text:"Implement a structured performance improvement plan with specific milestones.", domain: 'operis'}, 
-                    {text:"Try to understand what's causing the disengagement while protecting team morale.", domain: 'foederis'}
+                    {text:"Speak to him to understand what's causing the disengagement, while protecting team morale.", domain: 'foederis'}
                 ] 
             },
             { 
                 id: 'p2_03', 
-                scenario: "A key partner just had some staff changes, and the person you were working with had left. She is replaced by someone who questions everything your team had done. How might you deal with this?", 
+                scenario: "One of your partner organisations had a staff change. The new staff questions everything your team had done. How might you deal with this?", 
                 options: [
-                    {text:"Prepare documentation and evidence of our work, rationale, and results.", domain: 'mentis'}, 
-                    {text:"Take charge of resetting the relationship by clearly communicating our track record.", domain: 'imperii'}, 
-                    {text:"Systematically walk them through our processes, methodologies, and quality standards.", domain: 'operis'}, 
+                    {text:"Prepare clear documentation and evidence of our work, rationale, and results.", domain: 'mentis'}, 
+                    {text:"Take charge of resetting the relationship, and show the work done.", domain: 'imperii'}, 
+                    {text:"Walk them through our processes, methodologies, and quality standards step-by-step.", domain: 'operis'}, 
                     {text:"Invest time in building trust with the new contact by finding common ground.", domain: 'foederis'}
                 ] 
             },
             { 
                 id: 'p2_04', 
-                scenario: "A new project team has just launched and they do exactly the same thing you do. How might you react or respond to this news?", 
+                scenario: "You've got a new competitor that does exactly what you do! How might you react or respond?", 
                 options: [
                     {text:"Analyse their approach, capabilities, and potential impact to understand the competition.", domain: 'mentis'}, 
                     {text:"Double down on our strengths and accelerate our timeline to maintain our leading position.", domain: 'imperii'}, 
@@ -135,19 +137,19 @@ async function seedDatabase() {
             },
             { 
                 id: 'p2_05', 
-                scenario: "Your team had just figured out a great way to use generative AI to serve your end users. But it requires a lot of time investment. What might you do?", 
+                scenario: "Your team had just figured out a great way to use AI in the project, but it requires a lot of time investment. What might you do?", 
                 options: [
                     {text:"Evaluate the potential return on investment, risks, and long-term implications.", domain: 'mentis'}, 
-                    {text:"Champion this innovation as a strategic advantage and rally resources to pursue it.", domain: 'imperii'}, 
+                    {text:"Champion this innovation as a strategic advantage and gather resources to pursue it.", domain: 'imperii'}, 
                     {text:"Create a phased implementation plan that allows us to develop the AI solution while maintaining work-as-usual.", domain: 'operis'}, 
-                    {text:"Gauge team enthusiasm and capacity for this additional work.", domain: 'foederis'}
+                    {text:"Ask the team if they have the enthusiasm and capacity for this additional work.", domain: 'foederis'}
                 ] 
             },
             { 
                 id: 'p2_06', 
-                scenario: "Half of your team need to leave the project team due to scholarships and studies. You need to recruit more team members. What might you do?", 
+                scenario: "Half the team has been reassigned to another project, and you need to recruit more team members. What might you do?", 
                 options: [
-                    {text:"Assess exactly what skills and knowledge we're losing and plan criteria for replacements.", domain: 'mentis'}, 
+                    {text:"Assess exactly what skills and knowledge we're losing and plan the criteria for replacements.", domain: 'mentis'}, 
                     {text:"Quickly mobilise recruitment efforts while restructuring responsibilities to maintain momentum.", domain: 'imperii'}, 
                     {text:"Develop a systematic onboarding process and knowledge transfer plan for new members.", domain: 'operis'}, 
                     {text:"Leverage our network and team members' connections to find people who would be a good cultural fit.", domain: 'foederis'}
@@ -155,11 +157,11 @@ async function seedDatabase() {
             },
             { 
                 id: 'p2_07', 
-                scenario: "Team members are starting to have different interpretations of what success looks like for your project. What might you do?", 
+                scenario: "Team members are starting to have different ideas around what success looks like. What might you do?", 
                 options: [
-                    {text:"Facilitate an objective analysis of our original goals and current situation.", domain: 'mentis'}, 
-                    {text:"Bring everyone together to establish a clear, shared definition of success.", domain: 'imperii'}, 
-                    {text:"Create specific, measurable success criteria and milestones that leave no room for interpretation.", domain: 'operis'}, 
+                    {text:"Conduct an objective analysis of our original goals and current situation.", domain: 'mentis'}, 
+                    {text:"Hold a town hall to establish a clear, shared definition of success.", domain: 'imperii'}, 
+                    {text:"Create specific, measurable success criteria and leave no room for interpretation.", domain: 'operis'}, 
                     {text:"Host team discussions to understand different perspectives and build consensus.", domain: 'foederis'}
                 ] 
             },
@@ -167,9 +169,9 @@ async function seedDatabase() {
                 id: 'p2_08', 
                 scenario: "Someone told you a secret relating to the project work, and you know it will help your team greatly - but this secret is confidential. What might you do?", 
                 options: [
-                    {text:"Analyse the ethical implications and potential consequences of handling this information.", domain: 'mentis'}, 
-                    {text:"Find ways to guide the team toward the same insights without revealing the confidential information.", domain: 'imperii'}, 
-                    {text:"Respect the confidentiality while systematically exploring legitimate ways to achieve similar benefits.", domain: 'operis'}, 
+                    {text:"Analyse the pros and cons, and ethical concerns, of handling this information.", domain: 'mentis'}, 
+                    {text:"Creatively guide the team toward the key insights without revealing the confidential information.", domain: 'imperii'}, 
+                    {text:"Respect the confidentiality while exploring legitimate ways to achieve similar benefits.", domain: 'operis'}, 
                     {text:"Approach the person who shared the secret to discuss whether there are ways to share this information.", domain: 'foederis'}
                 ] 
             },
@@ -177,15 +179,15 @@ async function seedDatabase() {
                 id: 'p2_09', 
                 scenario: "You are invited to send only two of your team members to Japan for a reward trip and learning opportunity, but you have a larger team and everyone wants to go. What might you do?", 
                 options: [
-                    {text:"Establish objective criteria for selection based on contribution, development needs, and potential benefit.", domain: 'mentis'}, 
-                    {text:"Make a decisive choice based on strategic value while clearly communicating the rationale.", domain: 'imperii'}, 
-                    {text:"Create a fair, transparent selection process that considers multiple factors and is equitable.", domain: 'operis'}, 
+                    {text:"Create an objective selection rubric based on contribution, development needs, and potential benefit.", domain: 'mentis'}, 
+                    {text:"Make the decision as the leader, based on strategic value and clearly communicate the rationale to the team.", domain: 'imperii'}, 
+                    {text:"Set up a fair and transparent selection process with equitable and open criteria.", domain: 'operis'}, 
                     {text:"Explore creative alternatives like having the selected members share learnings and spread other trips around.", domain: 'foederis'}
                 ] 
             },
             { 
                 id: 'p2_10', 
-                scenario: "A team member has accidentally deleted your entire project's Google Drive folder. It is irretrievable and he feels terrible. What might you do?", 
+                scenario: "A team member has accidentally deleted your entire project's Google Drive folder. What might you do?", 
                 options: [
                     {text:"Assess exactly what was lost and what can be recovered from other sources.", domain: 'mentis'}, 
                     {text:"Take charge of damage control while mobilising everyone to rebuild critical materials.", domain: 'imperii'}, 

@@ -31,8 +31,8 @@ export default async function handler(request, response) {
                 archetypeScores: {},
                 questionNumber: 1,
                 phase: 1,
-                // ✅ NEW: Randomize question order within each phase
-                phase1Ids: questionBank.phase1.map(q => q.id).sort(() => 0.5 - Math.random()),
+                // ✅ NEW: Phase 1 in order, Phase 2 & 3 randomized
+                phase1Ids: questionBank.phase1.map(q => q.id), // Keep original order
                 phase2Ids: questionBank.phase2.map(q => q.id).sort(() => 0.5 - Math.random()),
                 phase3Ids: questionBank.phase3.map(q => q.id).sort(() => 0.5 - Math.random()),
                 history: [] 
@@ -42,7 +42,7 @@ export default async function handler(request, response) {
             const firstQuestion = questionBank.phase1.find(q => q.id === firstQuestionId);
             
             console.log('✅ Questions randomized:');
-            console.log('Phase 1 order:', sessionData.phase1Ids);
+            console.log('Phase 1 order: FIXED (not randomized)');
             console.log('Phase 2 order:', sessionData.phase2Ids);
             console.log('Phase 3 order:', sessionData.phase3Ids);
             
